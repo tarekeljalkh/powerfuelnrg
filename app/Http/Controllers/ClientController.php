@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\ClientsDataTable;
 use App\Models\Client;
 use Illuminate\Http\Request;
 
@@ -10,10 +11,9 @@ class ClientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(ClientsDataTable $dataTable)
     {
-        $clients = Client::all();
-        return view('clients.index', compact('clients'));
+        return $dataTable->render('clients.index');
     }
 
     /**
