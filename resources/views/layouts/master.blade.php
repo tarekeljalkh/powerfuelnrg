@@ -72,6 +72,7 @@
 
      <!-- Template JS File -->
      <script src="{{ asset('assets/js/scripts.js') }}"></script>
+
      <script>
          @if ($errors->any())
              @foreach ($errors->all() as $error)

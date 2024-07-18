@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\InventoriesDataTable;
+use App\Models\Inventory;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -20,7 +22,8 @@ class InventoryController extends Controller
      */
     public function create()
     {
-        return view('inventories.create');
+        $products = Product::all();
+        return view('inventories.create', compact('products'));
     }
 
     /**
@@ -30,21 +33,19 @@ class InventoryController extends Controller
     {
         // Validation
         $request->validate([
-            'name' => ['string', 'max:200'],
-            'description' => ['string', 'max:200'],
-            'price' => ['required', 'numeric'],
+            'product_id' => ['required', 'exists:products,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
+        // Create Inventory
+        $inventory = new Inventory();
+        $inventory->product_id = $request->product_id;
+        $inventory->quantity = $request->quantity;
+        $inventory->save();
 
-        $product = new Product();
-        $product->name = $request->name;
-        $product->description = $request->description;
-        $product->price = $request->price;
-        $product->save();
-
-        toastr()->success('Product Added Successfully');
+        toastr()->success('Inventory Added Successfully');
         // Redirect or return a response
-        return to_route('products.index');
+        return to_route('inventories.index');
     }
 
     /**
@@ -52,9 +53,8 @@ class InventoryController extends Controller
      */
     public function show(string $id)
     {
-        //make it show address as map
-        $product = Product::findOrFail($id);
-        return view('products.show', compact('product'));
+        $inventory = Inventory::findOrFail($id);
+        return view('inventories.show', compact('inventory'));
     }
 
     /**
@@ -62,8 +62,9 @@ class InventoryController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::findOrFail($id);
-        return view('products.edit', compact('product'));
+        $inventory = Inventory::findOrFail($id);
+        $products = Product::all();
+        return view('inventories.edit', compact('inventory', 'products'));
     }
 
     /**
@@ -71,24 +72,22 @@ class InventoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $product = Product::findOrFail($id);
+        $inventory = Inventory::findOrFail($id);
 
         // Validation
         $request->validate([
-            'name' => ['string', 'max:200'],
-            'description' => ['string', 'max:200'],
-            'price' => ['required', 'numeric'],
+            'product_id' => ['required', 'exists:products,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
+        // Update Inventory
+        $inventory->product_id = $request->product_id;
+        $inventory->quantity = $request->quantity;
+        $inventory->save();
 
-        $product->name = $request->name;
-        $product->description = $request->description;
-        $product->price = $request->price;
-        $product->save();
-
-        toastr()->success('Client Updated Successfully');
+        toastr()->success('Inventory Updated Successfully');
         // Redirect or return a response
-        return to_route('clients.index');
+        return to_route('inventories.index');
     }
 
     /**
@@ -97,12 +96,11 @@ class InventoryController extends Controller
     public function destroy(string $id)
     {
         try {
-            $product = Product::findOrFail($id);
-            $product->delete();
+            $inventory = Inventory::findOrFail($id);
+            $inventory->delete();
             return response(['status' => 'success', 'message' => 'Deleted Successfully!']);
         } catch (\Exception $e) {
-            //return response(['status' => 'error', 'message' =>  $e->getMessage()]);
-            return response(['status' => 'error', 'message' => 'something went wrong!']);
+            return response(['status' => 'error', 'message' => 'Something went wrong!']);
         }
     }
 }
