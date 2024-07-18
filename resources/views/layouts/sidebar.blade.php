@@ -29,7 +29,31 @@
                     href="{{ route('clients.index') }}"><i class="fas fa-users"></i>
                     <span>Clients</span></a></li>
 
-                    {{--
+            <li class="{{ request()->routeIs('suppliers.index') ? 'active' : '' }}"><a class="nav-link"
+                    href="{{ route('suppliers.index') }}"><i class="fas fa-users"></i>
+                    <span>Suppliers</span></a></li>
+
+            <li class="{{ request()->routeIs('products.index') ? 'active' : '' }}"><a class="nav-link"
+                    href="{{ route('products.index') }}"><i class="fas fa-users"></i>
+                    <span>Products</span></a></li>
+
+            <li class="{{ request()->routeIs('inventories.index') ? 'active' : '' }}"><a class="nav-link"
+                    href="{{ route('inventories.index') }}"><i class="fas fa-users"></i>
+                    <span>Inventory</span></a></li>
+
+            <li class="{{ request()->routeIs('returns.index') ? 'active' : '' }}"><a class="nav-link"
+                    href="{{ route('returns.index') }}"><i class="fas fa-users"></i>
+                    <span>Returns</span></a></li>
+
+            <li class="{{ request()->routeIs('expenses.index') ? 'active' : '' }}"><a class="nav-link"
+                    href="{{ route('expenses.index') }}"><i class="fas fa-users"></i>
+                    <span>Expenses</span></a></li>
+
+                    <li class="{{ request()->routeIs('orders.index') ? 'active' : '' }}"><a class="nav-link"
+                        href="{{ route('orders.index') }}"><i class="fas fa-users"></i>
+                        <span>Orders</span></a></li>
+
+            {{--
 
             <li class="{{ request()->routeIs('admin.labs.index') ? 'active' : '' }}"><a class="nav-link"
                     href="{{ route('admin.labs.index') }}"><i class="fas fa-flask"></i>

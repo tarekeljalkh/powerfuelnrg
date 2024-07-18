@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\Client;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -12,7 +12,7 @@ use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
-class ClientsDataTable extends DataTable
+class OrdersDataTable extends DataTable
 {
     /**
      * Build the DataTable class.
@@ -22,21 +22,14 @@ class ClientsDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->addColumn('action', function($query){
-                $edit = '<a href="'.route('clients.edit', $query->id).'" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>';
-                $delete = '<a href="'.route('clients.destroy', $query->id).'" class="delete-item btn btn-sm btn-danger ml-2"><i class="fas fa-trash"></i></a>';
-
-                return $edit.$delete;
-
-            })
-            ->rawColumns(['action'])
+            ->addColumn('action', 'orders.action')
             ->setRowId('id');
     }
 
     /**
      * Get the query source of dataTable.
      */
-    public function query(Client $model): QueryBuilder
+    public function query(Order $model): QueryBuilder
     {
         return $model->newQuery();
     }
@@ -47,7 +40,7 @@ class ClientsDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('clients-table')
+                    ->setTableId('orders-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     //->dom('Bfrtip')
@@ -69,18 +62,15 @@ class ClientsDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('id'),
-            Column::make('first_name'),
-            Column::make('last_name'),
-            Column::make('email'),
-            Column::make('mobile'),
-            Column::make('landline'),
-            Column::make('address'),
             Column::computed('action')
-            ->exportable(false)
-            ->printable(false)
-            ->width(150)
-            ->addClass('text-center'),
+                  ->exportable(false)
+                  ->printable(false)
+                  ->width(60)
+                  ->addClass('text-center'),
+            Column::make('id'),
+            Column::make('add your columns'),
+            Column::make('created_at'),
+            Column::make('updated_at'),
         ];
     }
 
@@ -89,6 +79,6 @@ class ClientsDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'Clients_' . date('YmdHis');
+        return 'Orders_' . date('YmdHis');
     }
 }

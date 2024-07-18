@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\Client;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -12,7 +12,7 @@ use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
-class ClientsDataTable extends DataTable
+class ProductsDataTable extends DataTable
 {
     /**
      * Build the DataTable class.
@@ -36,7 +36,7 @@ class ClientsDataTable extends DataTable
     /**
      * Get the query source of dataTable.
      */
-    public function query(Client $model): QueryBuilder
+    public function query(Product $model): QueryBuilder
     {
         return $model->newQuery();
     }
@@ -47,7 +47,7 @@ class ClientsDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('clients-table')
+                    ->setTableId('products-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     //->dom('Bfrtip')
@@ -70,12 +70,9 @@ class ClientsDataTable extends DataTable
     {
         return [
             Column::make('id'),
-            Column::make('first_name'),
-            Column::make('last_name'),
-            Column::make('email'),
-            Column::make('mobile'),
-            Column::make('landline'),
-            Column::make('address'),
+            Column::make('name'),
+            Column::make('description'),
+            Column::make('price'),
             Column::computed('action')
             ->exportable(false)
             ->printable(false)
@@ -89,6 +86,6 @@ class ClientsDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'Clients_' . date('YmdHis');
+        return 'Products_' . date('YmdHis');
     }
 }
