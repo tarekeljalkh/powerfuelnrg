@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('inventory_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
             $table->foreignId('inventory_id')->constrained()->onDelete('cascade');
-            $table->decimal('quantity', 8, 2);
-            $table->decimal('price', 8, 2);
-            $table->enum('status', ['pending', 'paid'])->default('paid');
-            $table->timestamp('order_date');
+            $table->decimal('quantity', 10, 2);
+            $table->timestamp('transaction_date')->useCurrent();
+            $table->string('type')->default('addition'); // Type of transaction, e.g., 'addition'
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('inventory_transactions');
     }
 };

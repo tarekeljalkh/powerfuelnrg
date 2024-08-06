@@ -24,13 +24,17 @@ class InventoriesDataTable extends DataTable
         return (new EloquentDataTable($query))
             ->addColumn('action', function ($query) {
                 $edit = '<a href="' . route('inventories.edit', $query->id) . '" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>';
-                $show = '<a href="' . route('inventories.show', $query->id) . '" class="btn btn-sm btn-danger ml-2"><i class="fas fa-eye"></i></a>';
+                $show = '<a href="' . route('inventories.show', $query->id) . '" class="btn btn-sm btn-info ml-2"><i class="fas fa-eye"></i></a>';
+                $addFuel = '<a href="' . route('inventories.addFuel', $query->id) . '" class="btn btn-sm btn-success ml-2"><i class="fas fa-gas-pump"></i></a>';
                 $delete = '<a href="' . route('inventories.destroy', $query->id) . '" class="delete-item btn btn-sm btn-danger ml-2"><i class="fas fa-trash"></i></a>';
 
-                return $edit .$show .$delete;
+                return $edit .$show .$addFuel .$delete;
             })
-            ->addColumn('product', function($query){
-                return $query->product->name;
+            ->addColumn('supplier', function($query) {
+                return $query->supplier->name;
+            })
+            ->addColumn('fuel_type', function($query) {
+                return $query->fuel_type;
             })
             ->rawColumns(['action'])
             ->setRowId('id');
@@ -73,12 +77,13 @@ class InventoriesDataTable extends DataTable
     {
         return [
             Column::make('id'),
-            Column::make('product'),
-            Column::make('quantity'),
+            Column::make('supplier')->title('Supplier'),
+            Column::make('fuel_type')->title('Fuel Type'),
+            Column::make('quantity')->title('Quantity'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
-                ->width(150)
+                ->width(200)
                 ->addClass('text-center'),
         ];
     }

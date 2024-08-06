@@ -24,9 +24,10 @@ class SuppliersDataTable extends DataTable
         return (new EloquentDataTable($query))
             ->addColumn('action', function($query){
                 $edit = '<a href="'.route('suppliers.edit', $query->id).'" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>';
+                $show = '<a href="'.route('suppliers.show', $query->id).'" class="btn btn-sm btn-info ml-2"><i class="fas fa-eye"></i></a>';
                 $delete = '<a href="'.route('suppliers.destroy', $query->id).'" class="delete-item btn btn-sm btn-danger ml-2"><i class="fas fa-trash"></i></a>';
 
-                return $edit.$delete;
+                return $edit .$show .$delete;
 
             })
             ->rawColumns(['action'])

@@ -9,7 +9,7 @@
             <h1>Edit Supplier</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="{{ route('supplier.index') }}">Suppliers</a></div>
+                <div class="breadcrumb-item"><a href="{{ route('suppliers.index') }}">Suppliers</a></div>
                 <div class="breadcrumb-item"><a href="#">Edit Supplier</a></div>
             </div>
         </div>
@@ -20,7 +20,7 @@
                 {{-- Supplier Section --}}
                 <div class="col-12 col-md-12 col-lg-12">
                     <div class="card">
-                        <form action="{{ route('supplier.update', $supplier->id) }}" method="post"
+                        <form action="{{ route('suppliers.update', $supplier->id) }}" method="post"
                             class="needs-validation" novalidate="">
                             @method('put')
                             @csrf

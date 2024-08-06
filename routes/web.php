@@ -7,6 +7,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
@@ -45,20 +46,18 @@ Route::middleware('auth')->group(function () {
     /** Suppliers Routes */
     Route::resource('suppliers', SupplierController::class);
 
-    /** Products Routes */
-    Route::resource('products', ProductController::class);
-
     /** Orders Routes */
     Route::resource('orders', OrderController::class);
 
-    /** Returns Routes */
-    Route::resource('returns', ReturnController::class);
-
-    /** Expenses Routes */
-    Route::resource('expenses', ExpenseController::class);
-
     /** Inventory Routes */
+    Route::get('/inventories/{id}/add-fuel', [InventoryController::class, 'showAddFuelForm'])->name('inventories.addFuel');
+    Route::post('/inventories/{id}/add-fuel', [InventoryController::class, 'addFuel'])->name('inventories.addFuel.store');
     Route::resource('inventories', InventoryController::class);
+
+    /** Reports Routes */
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/generate-invoice/{order}', [ReportController::class, 'generateInvoice'])->name('reports.generate-invoice');
 
 
     /** Profile Routes */

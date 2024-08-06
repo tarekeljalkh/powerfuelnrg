@@ -26,32 +26,25 @@
                 </ul>
             </li> --}}
             <li class="{{ request()->routeIs('clients.index') ? 'active' : '' }}"><a class="nav-link"
-                    href="{{ route('clients.index') }}"><i class="fas fa-users"></i>
+                    href="{{ route('clients.index') }}"><i class="fas fa-user-friends"></i>
                     <span>Clients</span></a></li>
 
             <li class="{{ request()->routeIs('suppliers.index') ? 'active' : '' }}"><a class="nav-link"
-                    href="{{ route('suppliers.index') }}"><i class="fas fa-users"></i>
+                    href="{{ route('suppliers.index') }}"><i class="fas fa-truck"></i>
                     <span>Suppliers</span></a></li>
 
-            <li class="{{ request()->routeIs('products.index') ? 'active' : '' }}"><a class="nav-link"
-                    href="{{ route('products.index') }}"><i class="fas fa-users"></i>
-                    <span>Products</span></a></li>
-
             <li class="{{ request()->routeIs('inventories.index') ? 'active' : '' }}"><a class="nav-link"
-                    href="{{ route('inventories.index') }}"><i class="fas fa-users"></i>
+                    href="{{ route('inventories.index') }}"><i class="fas fa-warehouse"></i>
                     <span>Inventory</span></a></li>
 
-            <li class="{{ request()->routeIs('returns.index') ? 'active' : '' }}"><a class="nav-link"
-                    href="{{ route('returns.index') }}"><i class="fas fa-users"></i>
-                    <span>Returns</span></a></li>
-
-            <li class="{{ request()->routeIs('expenses.index') ? 'active' : '' }}"><a class="nav-link"
-                    href="{{ route('expenses.index') }}"><i class="fas fa-users"></i>
-                    <span>Expenses</span></a></li>
-
                     <li class="{{ request()->routeIs('orders.index') ? 'active' : '' }}"><a class="nav-link"
-                        href="{{ route('orders.index') }}"><i class="fas fa-users"></i>
+                        href="{{ route('orders.index') }}"><i class="fas fa-shopping-cart"></i>
                         <span>Orders</span></a></li>
+
+                        <li class="{{ request()->routeIs('reports.index') ? 'active' : '' }}"><a class="nav-link"
+                            href="{{ route('reports.index') }}"><i class="fas fa-chart-line"></i>
+                            <span>Reports</span></a></li>
+
 
             {{--
 

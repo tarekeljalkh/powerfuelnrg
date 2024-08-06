@@ -22,16 +22,42 @@ class OrdersDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->addColumn('action', 'orders.action')
-            ->setRowId('id');
-    }
+        ->addColumn('action', function ($query) {
+            $edit = '<a href="' . route('orders.edit', $query->id) . '" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>';
+            $show = '<a href="' . route('orders.show', $query->id) . '" class="btn btn-sm btn-info ml-2"><i class="fas fa-eye"></i></a>';
+            $delete = '<a href="' . route('orders.destroy', $query->id) . '" class="delete-item btn btn-sm btn-danger ml-2"><i class="fas fa-trash"></i></a>';
+
+            return $edit .$show .$delete ;
+        })
+        ->addColumn('client_name', function ($order) {
+            return $order->client->first_name . ' ' . $order->client->last_name;
+        })
+        ->addColumn('inventory', function ($order) {
+            return $order->inventory->fuel_type;
+        })
+        ->editColumn('order_date', function ($order) {
+            return $order->order_date->format('Y-m-d');
+        })
+        ->addColumn('total', function ($order) {
+            return '$' . number_format($order->total, 2);
+        })
+        ->editColumn('status', function ($order) {
+            $status = ucfirst($order->status);
+            $badgeClass = $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : 'danger');
+            return '<span class="badge badge-' . $badgeClass . '">' . $status . '</span>';
+        })
+        ->rawColumns(['action', 'status'])
+        ->setRowId('id');
+}
 
     /**
      * Get the query source of dataTable.
      */
     public function query(Order $model): QueryBuilder
     {
-        return $model->newQuery();
+        //return $model->newQuery();
+        return $model->with(['client', 'inventory'])->newQuery();
+
     }
 
     /**
@@ -62,15 +88,19 @@ class OrdersDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::computed('action')
-                  ->exportable(false)
-                  ->printable(false)
-                  ->width(60)
-                  ->addClass('text-center'),
             Column::make('id'),
-            Column::make('add your columns'),
-            Column::make('created_at'),
-            Column::make('updated_at'),
+            Column::make('client_name')->title('Client Name'),
+            Column::make('inventory')->title('Fuel Type'),
+            Column::make('quantity'),
+            Column::make('price')->title('Price per Unit'),
+            Column::make('total')->title('Total Price'),
+            Column::make('order_date')->title('Order Date'),
+            Column::make('status'),
+            Column::computed('action')
+            ->exportable(false)
+            ->printable(false)
+            ->width(150)
+            ->addClass('text-center'),
         ];
     }
 

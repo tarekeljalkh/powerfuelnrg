@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\DataTables\InventoriesDataTable;
 use App\Models\Inventory;
-use App\Models\Product;
+use App\Models\InventoryTransaction;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -22,8 +23,8 @@ class InventoryController extends Controller
      */
     public function create()
     {
-        $products = Product::all();
-        return view('inventories.create', compact('products'));
+        $suppliers = Supplier::all();
+        return view('inventories.create', compact('suppliers'));
     }
 
     /**
@@ -33,17 +34,29 @@ class InventoryController extends Controller
     {
         // Validation
         $request->validate([
-            'product_id' => ['required', 'exists:products,id'],
-            'quantity' => ['required', 'integer', 'min:1'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'fuel_type' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'numeric', 'min:0'],
         ]);
 
-        // Create Inventory
-        $inventory = new Inventory();
-        $inventory->product_id = $request->product_id;
-        $inventory->quantity = $request->quantity;
-        $inventory->save();
+        try {
+            // Create Inventory
+            $inventory = Inventory::create($request->only('supplier_id', 'fuel_type', 'quantity'));
 
-        toastr()->success('Inventory Added Successfully');
+            // Record initial transaction
+            InventoryTransaction::create([
+                'supplier_id' => $inventory->supplier_id,
+                'inventory_id' => $inventory->id,
+                'quantity' => $inventory->quantity,
+                'transaction_date' => now(),
+                'type' => 'addition',
+            ]);
+
+            toastr()->success('Inventory Added Successfully');
+        } catch (\Exception $e) {
+            toastr()->error('Failed to add inventory.');
+        }
+
         // Redirect or return a response
         return to_route('inventories.index');
     }
@@ -53,7 +66,7 @@ class InventoryController extends Controller
      */
     public function show(string $id)
     {
-        $inventory = Inventory::findOrFail($id);
+        $inventory = Inventory::with(['supplier', 'transactions'])->findOrFail($id);
         return view('inventories.show', compact('inventory'));
     }
 
@@ -63,8 +76,8 @@ class InventoryController extends Controller
     public function edit(string $id)
     {
         $inventory = Inventory::findOrFail($id);
-        $products = Product::all();
-        return view('inventories.edit', compact('inventory', 'products'));
+        $suppliers = Supplier::all();
+        return view('inventories.edit', compact('inventory', 'suppliers'));
     }
 
     /**
@@ -76,16 +89,32 @@ class InventoryController extends Controller
 
         // Validation
         $request->validate([
-            'product_id' => ['required', 'exists:products,id'],
-            'quantity' => ['required', 'integer', 'min:1'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'fuel_type' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'numeric', 'min:0'],
         ]);
 
-        // Update Inventory
-        $inventory->product_id = $request->product_id;
-        $inventory->quantity = $request->quantity;
-        $inventory->save();
+        try {
+            // Update Inventory
+            $quantityDifference = $request->quantity - $inventory->quantity;
+            $inventory->update($request->only('supplier_id', 'fuel_type', 'quantity'));
 
-        toastr()->success('Inventory Updated Successfully');
+            // Record transaction if quantity has changed
+            if ($quantityDifference != 0) {
+                InventoryTransaction::create([
+                    'supplier_id' => $inventory->supplier_id,
+                    'inventory_id' => $inventory->id,
+                    'quantity' => abs($quantityDifference),
+                    'transaction_date' => now(),
+                    'type' => $quantityDifference > 0 ? 'addition' : 'reduction',
+                ]);
+            }
+
+            toastr()->success('Inventory Updated Successfully');
+        } catch (\Exception $e) {
+            toastr()->error('Failed to update inventory.');
+        }
+
         // Redirect or return a response
         return to_route('inventories.index');
     }
@@ -100,7 +129,54 @@ class InventoryController extends Controller
             $inventory->delete();
             return response(['status' => 'success', 'message' => 'Deleted Successfully!']);
         } catch (\Exception $e) {
-            return response(['status' => 'error', 'message' => 'Something went wrong!']);
+            //return response(['status' => 'error', 'message' =>  $e->getMessage()]);
+            return response(['status' => 'error', 'message' => 'something went wrong!']);
         }
+
+        return redirect()->route('inventories.index');
+    }
+
+    /**
+     * Show the form for adding fuel to the inventory.
+     */
+    public function showAddFuelForm($id)
+    {
+        $inventory = Inventory::findOrFail($id);
+        return view('inventories.add-fuel', compact('inventory'));
+    }
+
+    /**
+     * Add fuel to the inventory.
+     */
+    public function addFuel(Request $request, $inventoryId)
+    {
+        $inventory = Inventory::findOrFail($inventoryId);
+
+        $request->validate([
+            'quantity' => 'required|numeric|min:0',
+            'transaction_date' => 'required|date',
+        ]);
+
+        try {
+            $additionalQuantity = $request->quantity;
+
+            // Update inventory
+            $inventory->increment('quantity', $additionalQuantity);
+
+            // Record transaction
+            InventoryTransaction::create([
+                'supplier_id' => $inventory->supplier_id,
+                'inventory_id' => $inventory->id,
+                'quantity' => $additionalQuantity,
+                'transaction_date' => $request->transaction_date,
+                'type' => 'addition',
+            ]);
+
+            toastr()->success('Fuel added successfully and transaction recorded.');
+        } catch (\Exception $e) {
+            toastr()->error('Failed to add fuel.');
+        }
+
+        return redirect()->route('inventories.show', $inventory->id);
     }
 }

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Inventory;
+use App\Models\Order;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -13,7 +16,11 @@ class DashboardController extends Controller
     public function index()
     {
         $clients = Client::all()->count();
-        return view('dashboard', compact('clients'));
+        $suppliers = Supplier::all()->count();
+        $inventories = Inventory::all()->count();
+        $orders = Order::all()->count();
+
+        return view('dashboard', compact('clients', 'suppliers', 'inventories', 'orders'));
     }
 
     /**

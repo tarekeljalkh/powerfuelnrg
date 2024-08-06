@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('mobile');
             $table->string('landline');
             $table->string('address');
+            $table->string('vat_number')->nullable();
             $table->timestamps();
         });
     }

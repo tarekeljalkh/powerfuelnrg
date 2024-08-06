@@ -4,13 +4,13 @@
     <section class="section">
         <div class="section-header">
             <div class="section-header-back">
-                <a href="{{ route('clients.index') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
+                <a href="{{ route('suppliers.index') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
             </div>
-            <h1>Client Details</h1>
+            <h1>Supplier Details</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="{{ route('clients.index') }}">Clients</a></div>
-                <div class="breadcrumb-item">Client: {{ $client->first_name }} {{ $client->last_name }}</div>
+                <div class="breadcrumb-item"><a href="{{ route('suppliers.index') }}">Suppliers</a></div>
+                <div class="breadcrumb-item">Supplier: {{ $supplier->name }}</div>
             </div>
         </div>
 
@@ -19,36 +19,36 @@
                 <div class="col-12 col-md-8 offset-md-2 col-lg-8 offset-lg-2">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Client Information</h4>
+                            <h4>Supplier Information</h4>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>First Name</label>
-                                        <p>{{ $client->first_name }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Last Name</label>
-                                        <p>{{ $client->last_name }}</p>
+                                        <label>Supplier Name</label>
+                                        <p>{{ $supplier->name }}</p>
                                     </div>
                                     <div class="form-group">
                                         <label>Email</label>
-                                        <p>{{ $client->email }}</p>
+                                        <p>{{ $supplier->email }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Contact Number</label>
+                                        <p>{{ $supplier->contact_number }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Mobile</label>
-                                        <p>{{ $client->mobile }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Landline</label>
-                                        <p>{{ $client->landline }}</p>
-                                    </div>
-                                    <div class="form-group">
                                         <label>Address</label>
-                                        <p>{{ $client->address }}</p>
+                                        <p>{{ $supplier->address }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Company</label>
+                                        <p>{{ $supplier->company }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Joined Date</label>
+                                        <p>{{ $supplier->created_at->format('Y-m-d') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -57,37 +57,31 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h4>Orders</h4>
+                            <h4>Supplied Inventory</h4>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table id="orders-table" class="display nowrap" style="width:100%">
+                                <table id="inventory-table" class="display nowrap" style="width:100%">
                                     <thead>
                                         <tr>
-                                            <th>Order ID</th>
+                                            <th>Inventory ID</th>
                                             <th>Fuel Type</th>
-                                            <th>Quantity</th>
-                                            <th>Total Price</th>
-                                            <th>Order Date</th>
-                                            <th>Status</th>
+                                            <th>Quantity Available</th>
+                                            <th>Price per Unit</th>
+                                            <th>Added Date</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($client->orders as $order)
+                                        @foreach ($supplier->inventories as $inventory)
                                             <tr>
-                                                <td>{{ $order->id }}</td>
-                                                <td>{{ $order->inventory->fuel_type }}</td>
-                                                <td>{{ $order->quantity }} liters</td>
-                                                <td>${{ number_format($order->total, 2) }}</td>
-                                                <td>{{ $order->order_date->format('Y-m-d') }}</td>
+                                                <td>{{ $inventory->id }}</td>
+                                                <td>{{ $inventory->fuel_type }}</td>
+                                                <td>{{ $inventory->quantity }} liters</td>
+                                                <td>${{ number_format($inventory->price, 2) }}</td>
+                                                <td>{{ $inventory->created_at->format('Y-m-d') }}</td>
                                                 <td>
-                                                    <div class="badge badge-{{ $order->status == 'completed' ? 'success' : ($order->status == 'pending' ? 'warning' : 'danger') }}">
-                                                        {{ ucfirst($order->status) }}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-info btn-sm">View</a>
+                                                    <a href="{{ route('inventories.show', $inventory->id) }}" class="btn btn-info btn-sm">View</a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -106,7 +100,7 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#orders-table').DataTable({
+            $('#inventory-table').DataTable({
                 layout: {
                     topStart: {
                         buttons: ['excel', 'pdf', 'print']

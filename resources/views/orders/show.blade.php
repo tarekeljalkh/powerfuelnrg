@@ -1,79 +1,71 @@
-@extends('admin.layouts.master')
+@extends('layouts.master')
 
 @section('content')
     <section class="section">
         <div class="section-header">
             <div class="section-header-back">
-                <a href="{{ route('admin.dashboard') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
+                <a href="{{ route('orders.index') }}" class="btn btn-icon"><i class="fas fa-arrow-left"></i></a>
             </div>
-            <h1>{{ trans('messages.doctor') }}</h1>
+            <h1>Order Details</h1>
             <div class="section-header-breadcrumb">
-                <div class="breadcrumb-item active"><a href="{{ route('admin.dashboard') }}">{{ trans('messages.dashboard') }}</a></div>
-                <div class="breadcrumb-item"><a href="#">{{ trans('messages.doctor') }} : {{ $doctor->first_name }}, {{ $doctor->last_name }}</a></div>
+                <div class="breadcrumb-item active"><a href="{{ route('dashboard') }}">Dashboard</a></div>
+                <div class="breadcrumb-item"><a href="{{ route('orders.index') }}">Orders</a></div>
+                <div class="breadcrumb-item">Order #{{ $order->id }}</div>
             </div>
         </div>
 
         <div class="section-body">
-
             <div class="row">
-                <div class="col-12">
+                <div class="col-12 col-md-8 offset-md-2 col-lg-8 offset-lg-2">
                     <div class="card">
                         <div class="card-header">
-                            <h4>{{ trans('messages.doctor') }} : {{ $doctor->first_name }}, {{ $doctor->last_name }}</h4>
+                            <h4>Order Details</h4>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="example" class="display nowrap" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ trans('messages.patient') }}</th>
-                                            <th>{{ trans('messages.lab') }}</th>
-                                            <th>{{ trans('messages.external_lab') }}</th>
-                                            <th>{{ trans('messages.type') }}</th>
-                                            <th>{{ trans('messages.due_date') }}</th>
-                                            <th>{{ trans('messages.scan_date') }}</th>
-                                            <th>{{ trans('messages.stl_upper') }}</th>
-                                            <th>{{ trans('messages.stl_lower') }}</th>
-                                            <th>PDF</th>
-                                            <th>{{ trans('messages.lab_files') }}</th>
-                                            <th>{{ trans('messages.status') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($doctor->doctorScans as $scan)
-                                            <tr>
-                                                <td>{{ isset($scan->patient->first_name) ? $scan->patient->first_name : 'No Data' }}</td>
-                                                <td>{{ isset($scan->lab->first_name) ? $scan->lab->first_name : 'No Data' }}</td>
-                                                <td>{{ isset($scan->external_lab->first_name) ? $scan->external_lab->first_name : 'No Data' }}</td>
-                                                <td>{{ isset($scan->typeofwork->name) ? $scan->typeofwork->name : 'No Data' }}</td>
-                                                <td>{{ isset($scan->scan_date) ? $scan->scan_date : 'No Data' }}</td>
-                                                <td>{{ isset($scan->due_date) ? $scan->due_date : 'No Data' }}</td>
-                                                <td>{{ isset($scan->stl_upper) ? $scan->stl_upper : 'No Data' }}</td>
-                                                <td>{{ isset($scan->stl_lower) ? $scan->stl_lower : 'No Data' }}</td>
-                                                <td>{{ isset($scan->pdf) ? $scan->pdf : 'No Data' }}</td>
-                                                <td>{{ isset($scan->lab_file) ? $scan->lab_file : 'No Data' }}</td>
-                                                <td>
-                                                <div
-                                                    class="badge
-                                                        {{ optional($scan->latestStatus)->status == 'pending' ? 'badge-warning' : '' }}
-                                                        {{ optional($scan->latestStatus)->status == 'resubmitted' ? 'badge-info' : '' }}
-                                                        {{ optional($scan->latestStatus)->status == 'completed' ? 'badge-success' : '' }}
-                                                        {{ optional($scan->latestStatus)->status == 'rejected' ? 'badge-danger' : '' }}">
-                                                    {{ optional($scan->latestStatus)->status ?? 'No status' }}
-                                                </div>
-                                            </td>
-                                                {{-- <td>
-                                                    <a href="{{ route('admin.doctors.edit', $doctor->id) }}"
-                                                        class="btn btn-primary">Edit</a>
-                                                        <a href="{{ route('admin.doctors.show', $doctor->id) }}"
-                                                            class="btn btn-info">See Scans</a>
-                                                </td>
- --}}
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Client Name</label>
+                                        <p>{{ $order->client->first_name }} {{ $order->client->last_name }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fuel Type</label>
+                                        <p>{{ $order->inventory->fuel_type }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Quantity</label>
+                                        <p>{{ $order->quantity }} liters</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Price per Unit</label>
+                                        <p>${{ number_format($order->price, 2) }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Total Price</label>
+                                        <p>${{ number_format($order->total, 2) }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Order Date</label>
+                                        <p>{{ $order->order_date->format('Y-m-d') }}</p>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <p class="badge badge-{{ $order->status == 'completed' ? 'success' : ($order->status == 'pending' ? 'warning' : 'danger') }}">
+                                            {{ ucfirst($order->status) }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        <div class="card-footer text-right">
+                            <a href="{{ route('orders.edit', $order->id) }}" class="btn btn-primary">Edit Order</a>
+                            <form action="{{ route('orders.destroy', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this order?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete Order</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -81,15 +73,3 @@
         </div>
     </section>
 @endsection
-
-@push('scripts')
-    <script>
-        new DataTable('#example', {
-            layout: {
-                topStart: {
-                    buttons: ['excel', 'pdf', 'print']
-                }
-            }
-        });
-    </script>
-@endpush
