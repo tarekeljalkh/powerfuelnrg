@@ -1,0 +1,8 @@
+sacthirdparty is clients
+
+php artisan import:old-data
+
+
+
+dboSAcAccount -> 41110 -> clients account
+dboSAcAccount -> 53140 -> Cash
