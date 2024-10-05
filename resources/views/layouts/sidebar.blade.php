@@ -52,6 +52,13 @@
                 </a>
             </li>
 
+            <!-- Add the Client Statement Report Here -->
+            <li class="{{ request()->routeIs('reports.client_statement') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('reports.client_statement') }}">
+                    <i class="fas fa-file-alt"></i> <span>Client Statement Report</span>
+                </a>
+            </li>
+
 
             <li class="menu-header">Settings</li>
 

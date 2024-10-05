@@ -14,15 +14,19 @@ class InvoiceController extends Controller
         // Fetch client details
         $client = ThirdParty::findOrFail($clientId);
 
-        // Fetch all invoices or transaction details for the client
-        // Assuming you have an `invoices` table
-        $invoices = Invoice::where('client_id', $clientId)->get();
+        // Fetch all invoices for the client
+        $invoices = Invoice::with('lineItems') // Assuming Invoice has a relationship with LineItem
+                            ->where('client_id', $clientId)
+                            ->get();
 
-        // If you have line items
-        $lineItems = []; // Fetch from the database or create logic for line items
+        // Optionally calculate totals for the invoices and line items
+        $totalDue = $invoices->sum(function($invoice) {
+            return $invoice->lineItems->sum('amount'); // Assuming 'amount' is in the lineItems
+        });
 
-        return view('invoices.show', compact('client', 'invoices', 'lineItems'));
+        return view('invoices.show', compact('client', 'invoices', 'totalDue'));
     }
+
 
     /**
      * Display a listing of the resource.

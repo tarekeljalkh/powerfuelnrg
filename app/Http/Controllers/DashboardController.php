@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Inventory;
+use App\Models\Journal;
 use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\ThirdParty;
@@ -17,8 +18,18 @@ class DashboardController extends Controller
     public function index()
     {
         $clients = ThirdParty::all()->count();
-        return view('dashboard', compact('clients'));
+        // Fetch clients whose total debit is greater than total credit
+        $balances = Journal::with('thirdParty')
+            ->join('journal_line_items', 'journals.trans_id', '=', 'journal_line_items.trans_id')
+            ->selectRaw('third_party_id, sum(case when dc_indicator = "D" then amount else 0 end) as total_debit, sum(case when dc_indicator = "C" then amount else 0 end) as total_credit')
+            ->groupBy('third_party_id')
+            ->havingRaw('sum(case when dc_indicator = "D" then amount else 0 end) > sum(case when dc_indicator = "C" then amount else 0 end)') // Only clients who owe money
+            ->get();
+            $vouchers = Journal::where('trans_code', 'Jv')->count();
+            $receipts = Journal::where('trans_code', 'Rv')->count();
+            return view('dashboard', compact('clients', 'balances', 'vouchers', 'receipts'));
     }
+
 
     /**
      * Show the form for creating a new resource.

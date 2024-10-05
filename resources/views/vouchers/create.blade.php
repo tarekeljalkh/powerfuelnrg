@@ -78,7 +78,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <select name="line_items[0][account]" class="form-control" required="">
+                                                <select name="line_items[0][account]" class="form-control select2" required="">
                                                     @foreach($accounts as $account)
                                                         <option value="{{ $account->account_code}}">{{ $account->account_code }} {{ $account->account_name }}</option>
                                                     @endforeach
@@ -101,7 +101,7 @@
                                             </td>
                                             <td><input type="number" name="line_items[0][amount]" class="form-control" step="0.01" required=""></td>
                                             <td>
-                                                <select name="line_items[0][third_party_id]" class="form-control">
+                                                <select name="line_items[0][third_party_id]" class="form-control select2">
                                                     @foreach($thirdParties as $thirdParty)
                                                         <option value="{{ $thirdParty->id }}">{{ $thirdParty->name }}</option>
                                                     @endforeach

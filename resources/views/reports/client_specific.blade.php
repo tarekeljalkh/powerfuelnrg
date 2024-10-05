@@ -1,6 +1,5 @@
 @extends('layouts.master')
 
-
 @section('content')
 <section class="section">
     <div class="section-header">
@@ -43,18 +42,36 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Total Due</th>
-                            <th>Total Paid</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Debit (Due)</th>
+                            <th>Credit (Paid)</th>
                             <th>Balance</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>{{ number_format($balances->total_due, 2) }}</td>
-                            <td>{{ number_format($balances->total_paid, 2) }}</td>
-                            <td>{{ number_format($balances->total_due - $balances->total_paid, 2) }}</td>
-                        </tr>
+                        @php
+                            $runningBalance = 0;
+                        @endphp
+                        @foreach ($transactions as $transaction)
+                            <tr>
+                                <td>{{ $transaction->journal->trans_date }}</td>
+                                <td>{{ $transaction->description }}</td>
+                                <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 2) }}</td>
+                                <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 2) }}</td>
+                                <td>{{ number_format($runningBalance += ($transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount), 2) }}</td>
+                            </tr>
+                        @endforeach
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th></th>
+                            <th>{{ number_format($balances->total_due, 2) }}</th>
+                            <th>{{ number_format($balances->total_paid, 2) }}</th>
+                            <th>{{ number_format($balances->total_due - $balances->total_paid, 2) }}</th>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -79,5 +96,3 @@
     }
 </script>
 @endpush
-
-

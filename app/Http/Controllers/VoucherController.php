@@ -228,6 +228,13 @@ class VoucherController extends Controller
         $end_date = $request->get('end_date', now()->toDateString());  // Default end date (today)
 
         // Fetch all journal line items for the specific client within the date range
+        $transactions = JournalLineItem::where('third_party_id', $clientId)
+            ->whereHas('journal', function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('trans_date', [$start_date, $end_date]);
+            })
+            ->get();
+
+        // Calculate total due and total paid
         $balances = JournalLineItem::where('third_party_id', $clientId)
             ->whereHas('journal', function ($query) use ($start_date, $end_date) {
                 $query->whereBetween('trans_date', [$start_date, $end_date]);
@@ -240,6 +247,6 @@ class VoucherController extends Controller
         // Fetch the client details
         $client = ThirdParty::findOrFail($clientId);
 
-        return view('reports.client_specific', compact('balances', 'client', 'start_date', 'end_date'));
+        return view('reports.client_specific', compact('balances', 'client', 'start_date', 'end_date', 'transactions'));
     }
 }
