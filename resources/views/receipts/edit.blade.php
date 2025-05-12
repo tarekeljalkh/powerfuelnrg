@@ -1,5 +1,100 @@
 {@extends('layouts.master')
 
+@push('styles')
+    <style>
+        /* GLOBAL RESET */
+        html,
+        body {
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-content,
+        .section,
+        .container,
+        .card,
+        .section-body,
+        .row,
+        .col-12 {
+            max-width: 100%;
+            overflow-x: visible;
+        }
+
+        /* SELECT2 Styling */
+        .select2 {
+            width: 100% !important;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 48px !important;
+            padding: 8px 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .select2-selection__rendered {
+            line-height: 1.5 !important;
+        }
+
+        .select2-selection__arrow {
+            height: 48px !important;
+        }
+
+        /* TABLE STYLING */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #line-items-table {
+            width: 100%;
+            min-width: 900px;
+            /* force horizontal scroll when needed */
+        }
+
+        #line-items-table th,
+        #line-items-table td {
+            white-space: nowrap;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        #line-items-table select,
+        #line-items-table input {
+            font-size: 14px;
+            height: 42px;
+            padding: 6px 10px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+
+            .card-header,
+            .card-body,
+            .card-footer {
+                padding: 1rem !important;
+            }
+
+            .table-responsive {
+                margin-bottom: 1rem;
+            }
+
+            #line-items-table {
+                min-width: 768px;
+            }
+        }
+    </style>
+@endpush
+
+
 @section('content')
     <section class="section">
         <div class="section-header">
@@ -72,84 +167,90 @@
                                 <!-- Line Items -->
                                 <div class="form-group">
                                     <label>Line Items</label>
-                                    <table class="table table-bordered" id="line-items-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Account</th>
-                                                <th>Currency</th>
-                                                <th>Reference</th>
-                                                <th>Description</th>
-                                                <th>Debit/Credit</th>
-                                                <th>Amount</th>
-                                                <th>Third Party</th>
-                                                <th><button type="button" class="btn btn-success add-row">+</button></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($receipt->lineItems as $index => $item)
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="line-items-table">
+                                            <thead>
                                                 <tr>
-                                                    <td>
-                                                        <select name="line_items[{{ $index }}][account]"
-                                                            class="form-control select2" required="">
-                                                            @foreach ($accounts as $account)
-                                                                <option value="{{ $account->account_code }}"
-                                                                    {{ $item->account == $account->account_code ? 'selected' : '' }}>
-                                                                    {{ $account->account_code }}
-                                                                    {{ $account->account_name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select name="line_items[{{ $index }}][currency]"
-                                                            class="form-control" required="">
-                                                            @foreach ($currencies as $currency)
-                                                                <option value="{{ $currency->id }}"
-                                                                    {{ $item->currency == $currency->id ? 'selected' : '' }}>
-                                                                    {{ $currency->currency_code }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="text"
-                                                            name="line_items[{{ $index }}][reference]"
-                                                            class="form-control" value="{{ $item->reference }}"></td>
-                                                    <td><input type="text"
-                                                            name="line_items[{{ $index }}][description]"
-                                                            class="form-control" value="{{ $item->description }}"></td>
-                                                    <td>
-                                                        <select name="line_items[{{ $index }}][dc_indicator]"
-                                                            class="form-control" required="">
-                                                            <option value="D"
-                                                                {{ $item->dc_indicator == 'D' ? 'selected' : '' }}>Debit
-                                                            </option>
-                                                            <option value="C"
-                                                                {{ $item->dc_indicator == 'C' ? 'selected' : '' }}>Credit
-                                                            </option>
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="number"
-                                                            name="line_items[{{ $index }}][amount]"
-                                                            class="form-control" step="0.01" value="{{ $item->amount }}"
-                                                            required=""></td>
-                                                    <td>
-                                                        <select name="line_items[{{ $index }}][third_party_id]"
-                                                            class="form-control select2">
-                                                            <option value="">--</option>
-                                                            @foreach ($thirdParties as $thirdParty)
-                                                                <option value="{{ $thirdParty->id }}"
-                                                                    {{ $item->third_party_id == $thirdParty->id ? 'selected' : '' }}>
-                                                                    {{ $thirdParty->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td><button type="button" class="btn btn-danger remove-row">-</button>
-                                                    </td>
+                                                    <th>Account</th>
+                                                    <th>Currency</th>
+                                                    <th>Reference</th>
+                                                    <th>Description</th>
+                                                    <th>Debit/Credit</th>
+                                                    <th>Amount</th>
+                                                    <th>Third Party</th>
+                                                    <th><button type="button" class="btn btn-success add-row">+</button>
+                                                    </th>
                                                 </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($receipt->lineItems as $index => $item)
+                                                    <tr>
+                                                        <td>
+                                                            <select name="line_items[{{ $index }}][account]"
+                                                                class="form-control select2" required="">
+                                                                @foreach ($accounts as $account)
+                                                                    <option value="{{ $account->account_code }}"
+                                                                        {{ $item->account == $account->account_code ? 'selected' : '' }}>
+                                                                        {{ $account->account_code }}
+                                                                        {{ $account->account_name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select name="line_items[{{ $index }}][currency]"
+                                                                class="form-control" required="">
+                                                                @foreach ($currencies as $currency)
+                                                                    <option value="{{ $currency->id }}"
+                                                                        {{ $item->currency == $currency->id ? 'selected' : '' }}>
+                                                                        {{ $currency->currency_code }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text"
+                                                                name="line_items[{{ $index }}][reference]"
+                                                                class="form-control" value="{{ $item->reference }}"></td>
+                                                        <td><input type="text"
+                                                                name="line_items[{{ $index }}][description]"
+                                                                class="form-control" value="{{ $item->description }}"></td>
+                                                        <td>
+                                                            <select name="line_items[{{ $index }}][dc_indicator]"
+                                                                class="form-control" required="">
+                                                                <option value="D"
+                                                                    {{ $item->dc_indicator == 'D' ? 'selected' : '' }}>
+                                                                    Debit
+                                                                </option>
+                                                                <option value="C"
+                                                                    {{ $item->dc_indicator == 'C' ? 'selected' : '' }}>
+                                                                    Credit
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="number"
+                                                                name="line_items[{{ $index }}][amount]"
+                                                                class="form-control" step="0.01"
+                                                                value="{{ $item->amount }}" required=""></td>
+                                                        <td>
+                                                            <select name="line_items[{{ $index }}][third_party_id]"
+                                                                class="form-control select2">
+                                                                <option value="">--</option>
+                                                                @foreach ($thirdParties as $thirdParty)
+                                                                    <option value="{{ $thirdParty->id }}"
+                                                                        {{ $item->third_party_id == $thirdParty->id ? 'selected' : '' }}>
+                                                                        {{ $thirdParty->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </td>
+                                                        <td><button type="button"
+                                                                class="btn btn-danger remove-row">-</button>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
 
