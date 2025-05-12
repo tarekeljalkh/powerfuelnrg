@@ -22,50 +22,54 @@
                             $totalCredit = 0;
                             $totalBalance = 0;
                         @endphp
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Client Name</th>
-                                    <th>Total Debit</th>
-                                    <th>Total Credit</th>
-                                    <th>Balance</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($balances as $balance)
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
                                     <tr>
-                                        <td>{{ $balance->thirdParty ? $balance->thirdParty->name : 'Unknown Client' }}</td>
-                                        <td>{{ number_format($balance->total_debit, 2) }}</td>
-                                        <td>{{ number_format($balance->total_credit, 2) }}</td>
-                                        <td>{{ number_format($balance->total_debit - $balance->total_credit, 2) }}</td>
-                                        <td>
-                                            @if ($balance->thirdParty)
-                                                <a href="{{ route('reports.client_specific', ['id' => $balance->thirdParty->id]) }}"
-                                                    class="btn btn-info">
-                                                    View Detailed Report
-                                                </a>
-                                            @else
-                                                <span class="text-muted">No client data available</span>
-                                            @endif
-                                        </td>
+                                        <th>Client Name</th>
+                                        <th>Total Debit</th>
+                                        <th>Total Credit</th>
+                                        <th>Balance</th>
+                                        <th>Actions</th>
                                     </tr>
-                                    @php
-                                        $totalDebit += $balance->total_debit;
-                                        $totalCredit += $balance->total_credit;
-                                        $totalBalance += $balance->total_debit - $balance->total_credit;
-                                    @endphp
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th>Total</th>
-                                    <th>{{ number_format($totalDebit, 2) }}</th>
-                                    <th>{{ number_format($totalCredit, 2) }}</th>
-                                    <th>{{ number_format($totalBalance, 2) }}</th>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($balances as $balance)
+                                        <tr>
+                                            <td>{{ $balance->thirdParty ? $balance->thirdParty->name : 'Unknown Client' }}
+                                            </td>
+                                            <td>{{ number_format($balance->total_debit, 2) }}</td>
+                                            <td>{{ number_format($balance->total_credit, 2) }}</td>
+                                            <td>{{ number_format($balance->total_debit - $balance->total_credit, 2) }}</td>
+                                            <td>
+                                                @if ($balance->thirdParty)
+                                                    <a href="{{ route('reports.client_specific', ['id' => $balance->thirdParty->id]) }}"
+                                                        class="btn btn-info">
+                                                        View Detailed Report
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">No client data available</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @php
+                                            $totalDebit += $balance->total_debit;
+                                            $totalCredit += $balance->total_credit;
+                                            $totalBalance += $balance->total_debit - $balance->total_credit;
+                                        @endphp
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Total</th>
+                                        <th>{{ number_format($totalDebit, 2) }}</th>
+                                        <th>{{ number_format($totalCredit, 2) }}</th>
+                                        <th>{{ number_format($totalBalance, 2) }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     @else
                         <p>No clients owe money.</p>
                     @endif

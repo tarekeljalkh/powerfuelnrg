@@ -46,44 +46,46 @@
                         {{ \Carbon\Carbon::parse($end_date)->format('d/m/Y') }}</h4>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Debit (Due)</th>
-                                <th>Credit (Paid)</th>
-                                <th>Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php
-                                $runningBalance = 0;
-                            @endphp
-                            @foreach ($transactions as $transaction)
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($transaction->journal->trans_date)->format('d/m/Y H:i') }}
-                                    </td>
-                                    <td>{{ $transaction->description }}</td>
-                                    <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 2) }}
-                                    </td>
-                                    <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 2) }}
-                                    </td>
-                                    <td>{{ number_format($runningBalance += $transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount, 2) }}
-                                    </td>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Debit (Due)</th>
+                                    <th>Credit (Paid)</th>
+                                    <th>Balance</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th>Total</th>
-                                <th></th>
-                                <th>{{ number_format($balances->total_due, 2) }}</th>
-                                <th>{{ number_format($balances->total_paid, 2) }}</th>
-                                <th>{{ number_format($balances->total_due - $balances->total_paid, 2) }}</th>
-                            </tr>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $runningBalance = 0;
+                                @endphp
+                                @foreach ($transactions as $transaction)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($transaction->journal->trans_date)->format('d/m/Y H:i') }}
+                                        </td>
+                                        <td>{{ $transaction->description }}</td>
+                                        <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 2) }}
+                                        </td>
+                                        <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 2) }}
+                                        </td>
+                                        <td>{{ number_format($runningBalance += $transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Total</th>
+                                    <th></th>
+                                    <th>{{ number_format($balances->total_due, 2) }}</th>
+                                    <th>{{ number_format($balances->total_paid, 2) }}</th>
+                                    <th>{{ number_format($balances->total_due - $balances->total_paid, 2) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
 

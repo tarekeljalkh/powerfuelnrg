@@ -49,41 +49,43 @@
                             $totalCredit = 0;
                             $totalBalance = 0;
                         @endphp
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Client Name</th>
-                                    <th>Total Debit</th>
-                                    <th>Total Credit</th>
-                                    <th>Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($balances as $balance)
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            {{ $balance->thirdParty ? $balance->thirdParty->name : 'Unknown Client' }}
-                                        </td>
-                                        <td>{{ number_format($balance->total_debit, 2) }}</td>
-                                        <td>{{ number_format($balance->total_credit, 2) }}</td>
-                                        <td>{{ number_format($balance->total_debit - $balance->total_credit, 2) }}</td>
+                                        <th>Client Name</th>
+                                        <th>Total Debit</th>
+                                        <th>Total Credit</th>
+                                        <th>Balance</th>
                                     </tr>
-                                    @php
-                                        $totalDebit += $balance->total_debit;
-                                        $totalCredit += $balance->total_credit;
-                                        $totalBalance += $balance->total_debit - $balance->total_credit;
-                                    @endphp
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th>Total</th>
-                                    <th>{{ number_format($totalDebit, 2) }}</th>
-                                    <th>{{ number_format($totalCredit, 2) }}</th>
-                                    <th>{{ number_format($totalBalance, 2) }}</th>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($balances as $balance)
+                                        <tr>
+                                            <td>
+                                                {{ $balance->thirdParty ? $balance->thirdParty->name : 'Unknown Client' }}
+                                            </td>
+                                            <td>{{ number_format($balance->total_debit, 2) }}</td>
+                                            <td>{{ number_format($balance->total_credit, 2) }}</td>
+                                            <td>{{ number_format($balance->total_debit - $balance->total_credit, 2) }}</td>
+                                        </tr>
+                                        @php
+                                            $totalDebit += $balance->total_debit;
+                                            $totalCredit += $balance->total_credit;
+                                            $totalBalance += $balance->total_debit - $balance->total_credit;
+                                        @endphp
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Total</th>
+                                        <th>{{ number_format($totalDebit, 2) }}</th>
+                                        <th>{{ number_format($totalCredit, 2) }}</th>
+                                        <th>{{ number_format($totalBalance, 2) }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     @else
                         <p>No data found for the selected date range.</p>
                     @endif
