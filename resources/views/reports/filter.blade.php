@@ -1,5 +1,10 @@
 @extends('layouts.master')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+@endpush
+
+
 @section('content')
     <section class="section">
         <div class="section-header">
@@ -19,12 +24,12 @@
                 <div class="row">
                     <div class="form-group col-md-6">
                         <label for="start_date">Start Date</label>
-                        <input type="date" name="start_date" class="form-control"
+                        <input type="text" name="start_date" class="form-control flatpickr"
                             value="{{ request()->get('start_date', now()->toDateString()) }}" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="end_date">End Date</label>
-                        <input type="date" name="end_date" class="form-control"
+                        <input type="text" name="end_date" class="form-control flatpickr"
                             value="{{ request()->get('end_date', now()->toDateString()) }}" required>
                     </div>
                 </div>
@@ -92,6 +97,8 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
         function printSection(divId) {
             var content = document.getElementById(divId).innerHTML;
@@ -99,9 +106,16 @@
 
             document.body.innerHTML = content;
             window.print();
-
-            // After printing, restore the original content
             document.body.innerHTML = originalContent;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr(".flatpickr", {
+                dateFormat: "Y-m-d", // This goes to the backend (form submit)
+                altInput: true, // Enables visible user-friendly display
+                altFormat: "d/m/Y", // What the user sees
+                allowInput: true
+            });
+        });
     </script>
 @endpush

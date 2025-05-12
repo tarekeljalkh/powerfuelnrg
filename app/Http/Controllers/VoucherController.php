@@ -223,15 +223,21 @@ class VoucherController extends Controller
 
     public function clientSpecificReport(Request $request, $clientId)
     {
-        // Define default dates (from the beginning of time)
-        $start_date = $request->get('start_date', '1970-01-01');  // Default start date
-        $end_date = $request->get('end_date', now()->toDateString());  // Default end date (today)
+        // Default to current year start if no start_date is provided
+        $start_date = $request->get('start_date', now()->startOfYear()->toDateString());
+        $end_date = $request->get('end_date', now()->toDateString());
 
-        // Fetch all journal line items for the specific client within the date range
-        $transactions = JournalLineItem::where('third_party_id', $clientId)
+        // Fetch transactions within the date range
+        $transactions = \App\Models\JournalLineItem::with('journal')
+            ->where('third_party_id', $clientId)
             ->whereHas('journal', function ($query) use ($start_date, $end_date) {
                 $query->whereBetween('trans_date', [$start_date, $end_date]);
             })
+            ->orderByDesc(
+                Journal::select('trans_date')
+                    ->whereColumn('journals.trans_id', 'journal_line_items.trans_id')
+                    ->limit(1)
+            )
             ->get();
 
         // Calculate total due and total paid
@@ -240,8 +246,8 @@ class VoucherController extends Controller
                 $query->whereBetween('trans_date', [$start_date, $end_date]);
             })
             ->selectRaw('
-                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_due,
-                SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid')
+            SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_due,
+            SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid')
             ->first();
 
         // Fetch the client details
