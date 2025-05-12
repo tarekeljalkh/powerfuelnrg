@@ -105,7 +105,7 @@ class ReceiptController extends Controller
         $request->validate([
             'type_id' => 'required|exists:transaction_types,id',  // Validate type_id to ensure it exists in transaction_types table
             'trx_ref' => 'required|string|max:50',
-            'trx_date' => 'nullable|date',  // Allow null and date format
+            'trans_date' => 'nullable|date',  // Allow null and date format
             'activation_date' => 'nullable|date',  // Allow null and date format
             'line_items.*.account' => 'required|string',
             'line_items.*.currency' => 'required|string',
@@ -124,7 +124,7 @@ class ReceiptController extends Controller
             'trans_code' => $trans_code,
             'type_id' => $request->type_id,
             'manual_ref' => $request->trx_ref,
-            'trans_date' => $request->trx_date ?? now(),
+            'trans_date' => $request->trans_date ?? now(),
             'activation_date' => $request->activation_date ?? now(),
             'locked' => false,
             'created_by' => auth()->user()->id,

@@ -81,7 +81,7 @@
                                         @foreach($voucher->lineItems as $index => $item)
                                             <tr>
                                                 <td>
-                                                    <select name="line_items[{{ $index }}][account]" class="form-control" required="">
+                                                    <select name="line_items[{{ $index }}][account]" class="form-control select2" required="">
                                                         @foreach($accounts as $account)
                                                             <option value="{{ $account->account_code }}" {{ $item->account_code == $account->account_code ? 'selected' : '' }}>
                                                                 {{ $account->account_code }} {{ $account->account_name }}
@@ -108,7 +108,7 @@
                                                 </td>
                                                 <td><input type="number" name="line_items[{{ $index }}][amount]" class="form-control" value="{{ $item->amount }}" step="0.01" required=""></td>
                                                 <td>
-                                                    <select name="line_items[{{ $index }}][third_party_id]" class="form-control">
+                                                    <select name="line_items[{{ $index }}][third_party_id]" class="form-control select2">
                                                         @foreach($thirdParties as $thirdParty)
                                                             <option value="{{ $thirdParty->id }}" {{ $item->third_party_id == $thirdParty->id ? 'selected' : '' }}>
                                                                 {{ $thirdParty->name }}

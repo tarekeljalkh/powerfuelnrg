@@ -13,6 +13,12 @@ class Receipt extends Model
         'third_party_id', 'trans_id', 'receipt_number', 'amount', 'date', 'payment_method', 'created_by'
     ];
 
+protected $casts = [
+    'trans_date' => 'datetime',
+    'activation_date' => 'datetime',
+];
+
+
     public function journal()
     {
         return $this->belongsTo(Journal::class, 'trans_id', 'trans_id');
