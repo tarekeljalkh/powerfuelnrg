@@ -1,6 +1,9 @@
 @extends('layouts.master')
 
 @push('styles')
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <style>
         /* GLOBAL RESET */
         html,
@@ -109,7 +112,7 @@
             </div>
         </div>
 
-        <div class="section-body">
+        <div class="section-body zoom-50">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -264,6 +267,8 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
         $(document).ready(function() {
             let rowIndex = {{ count($voucher->lineItems) }};
@@ -311,6 +316,15 @@
             // Remove line item row
             $('#line-items-table').on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr(".flatpickr", {
+                dateFormat: "Y-m-d", // This goes to the backend (form submit)
+                altInput: true, // Enables visible user-friendly display
+                altFormat: "d/m/Y", // What the user sees
+                allowInput: true
             });
         });
     </script>

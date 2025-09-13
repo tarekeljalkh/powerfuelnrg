@@ -200,6 +200,8 @@ class ImportOldData extends Command
                     [
                         'account_code' => $row['AccCode'],
                         'dc_indicator' => $row['DC'],
+                        'refenrece' => $row['Reference'],
+                        'currency' => $row['CURCODE'],
                         'amount' => $this->cleanNumericData($row['Amount']),
                         'third_party_id' => ThirdParty::where('id', $this->cleanNumericData($row['ThirdId']))->first()->id ?? null,
                         'created_by' => 1,

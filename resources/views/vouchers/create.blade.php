@@ -1,6 +1,8 @@
 @extends('layouts.master')
 
 @push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <style>
         /* GLOBAL RESET */
         html,
@@ -108,7 +110,7 @@
             </div>
         </div>
 
-        <div class="section-body">
+        <div class="section-body zoom-50">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -148,12 +150,12 @@
                                 <div class="row">
                                     <div class="form-group col-md-6">
                                         <label>Transaction Date</label>
-                                        <input type="date" name="trx_date" class="form-control"
+                                        <input type="date" name="trx_date" class="form-control flatpickr"
                                             value="{{ old('trx_date', now()->toDateString()) }}" required="">
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Activation Date</label>
-                                        <input type="date" name="activation_date" class="form-control"
+                                        <input type="date" name="activation_date" class="form-control flatpickr"
                                             value="{{ old('activation_date', now()->toDateString()) }}" required="">
                                     </div>
                                 </div>
@@ -242,6 +244,8 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
         $(document).ready(function() {
             let rowIndex = 1;
@@ -289,6 +293,15 @@
             // Remove line item row
             $('#line-items-table').on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr(".flatpickr", {
+                dateFormat: "Y-m-d", // This goes to the backend (form submit)
+                altInput: true, // Enables visible user-friendly display
+                altFormat: "d/m/Y", // What the user sees
+                allowInput: true
             });
         });
     </script>

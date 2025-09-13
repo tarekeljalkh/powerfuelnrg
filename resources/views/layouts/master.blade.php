@@ -35,7 +35,7 @@
     @stack('styles')
 </head>
 
-<body>
+<body class="sidebar-mini">
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
 
@@ -49,8 +49,7 @@
             </div>
             <footer class="main-footer">
                 <div class="footer-left">
-                    Copyright &copy; {{ date('Y') }} <div class="bullet"></div> Coded By <a
-                        href="#">TJ</a>
+                    Copyright &copy; {{ date('Y') }} <div class="bullet"></div> Coded By <a href="#">TJ</a>
                 </div>
                 <div class="footer-right"></div>
             </footer>
@@ -149,6 +148,26 @@
                     });
                 }
             });
+        });
+    </script>
+
+    <script>
+        $(function() {
+            if ($('body').hasClass('sidebar-mini')) {
+                $(".main-sidebar .sidebar-menu > li").each(function() {
+                    let me = $(this);
+                    if (!me.find('> .dropdown-menu').length) {
+                        let link = me.find('> a');
+                        link.attr('data-toggle', 'tooltip');
+                        link.attr('data-original-title', link.text());
+                    }
+                });
+
+                // Initialize all tooltips
+                $("[data-toggle='tooltip']").tooltip({
+                    placement: 'right'
+                });
+            }
         });
     </script>
 

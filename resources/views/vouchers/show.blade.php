@@ -67,7 +67,7 @@
                                 <tr>
                                     <td>{{ $item->account_code }}</td>
                                     <td>{{ $item->aux ?? 'N/A' }}</td> <!-- Handle optional auxiliary field -->
-                                    <td>{{ $item->currency }}</td> <!-- Display currency -->
+                                    <td>{{ $item->currencyInfo->currency_code }}</td> <!-- Display currency -->
                                     <td>{{ $item->description }}</td>
                                     <td>{{ $item->amount }}</td>
                                     <td>{{ $item->dc_indicator == 'D' ? 'Debit' : 'Credit' }}</td>

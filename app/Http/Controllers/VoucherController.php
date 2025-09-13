@@ -84,7 +84,7 @@ class VoucherController extends Controller
 
     public function show($id)
     {
-        $voucher = Journal::with('lineItems')->findOrFail($id);
+        $voucher = Journal::with('lineItems.currencyInfo')->findOrFail($id);
         return view('vouchers.show', compact('voucher'));
     }
 
@@ -133,7 +133,6 @@ class VoucherController extends Controller
 
         // Delete existing line items
         $journal->lineItems()->delete();
-
         // Iterate over each line item and save it to the journal_line_items table
         foreach ($request->line_items as $index => $item) {
             JournalLineItem::create([

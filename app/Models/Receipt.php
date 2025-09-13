@@ -10,13 +10,20 @@ class Receipt extends Model
     use HasFactory;
 
     protected $fillable = [
-        'third_party_id', 'trans_id', 'receipt_number', 'amount', 'date', 'payment_method', 'created_by'
+        'third_party_id',
+        'trans_id',
+        'receipt_number',
+        'manual_ref',
+        'amount',
+        'date',
+        'payment_method',
+        'created_by'
     ];
 
-protected $casts = [
-    'trans_date' => 'datetime',
-    'activation_date' => 'datetime',
-];
+    protected $casts = [
+        'trans_date' => 'datetime',
+        'activation_date' => 'datetime',
+    ];
 
 
     public function journal()
@@ -33,6 +40,4 @@ protected $casts = [
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
-
 }

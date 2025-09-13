@@ -16,8 +16,11 @@ class JournalLineItem extends Model
         'ligne_id',
         'account_code',
         'dc_indicator',
+        'reference',
+        'currency',
         'amount',
         'third_party_id',
+        'description',
         'created_by',
         'updated_by'
     ];
@@ -30,5 +33,11 @@ class JournalLineItem extends Model
     public function thirdParty()
     {
         return $this->belongsTo(ThirdParty::class, 'third_party_id');
+    }
+
+
+    public function currencyInfo()
+    {
+        return $this->belongsTo(Currency::class, 'currency', 'id');
     }
 }
