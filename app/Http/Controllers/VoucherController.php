@@ -206,15 +206,18 @@ class VoucherController extends Controller
         $end_date = $request->get('end_date', $today);
 
         // Fetch the balance data
-        $balances = JournalLineItem::with('thirdParty')
-            ->whereHas('journal', function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('trans_date', [$start_date, $end_date]);
-            })
-            ->selectRaw('third_party_id,
-                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
-                SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit')
-            ->groupBy('third_party_id')
-            ->get();
+$balances = JournalLineItem::with('thirdParty')
+    ->whereHas('journal', function ($query) use ($start_date, $end_date) {
+        $query->whereBetween('trans_date', [$start_date, $end_date]);
+    })
+    ->selectRaw('third_party_id,
+        SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
+        SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit,
+        SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END)
+        - SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as balance')
+    ->groupBy('third_party_id')
+    ->havingRaw('balance > 0') // 👈 only positive balances
+    ->get();
 
         // Pass the balances to the view
         return view('reports.filter', compact('balances', 'start_date', 'end_date'));
