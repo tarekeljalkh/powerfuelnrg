@@ -206,18 +206,18 @@ class VoucherController extends Controller
         $end_date = $request->get('end_date', $today);
 
         // Fetch the balance data
-$balances = JournalLineItem::with('thirdParty')
-    ->whereHas('journal', function ($query) use ($start_date, $end_date) {
-        $query->whereBetween('trans_date', [$start_date, $end_date]);
-    })
-    ->selectRaw('third_party_id,
+        $balances = JournalLineItem::with('thirdParty')
+            ->whereHas('journal', function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('trans_date', [$start_date, $end_date]);
+            })
+            ->selectRaw('third_party_id,
         SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
         SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit,
         SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END)
         - SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as balance')
-    ->groupBy('third_party_id')
-    ->havingRaw('balance > 0') // 👈 only positive balances
-    ->get();
+            ->groupBy('third_party_id')
+            ->havingRaw('balance > 0') // 👈 only positive balances
+            ->get();
 
         // Pass the balances to the view
         return view('reports.filter', compact('balances', 'start_date', 'end_date'));
@@ -252,9 +252,17 @@ $balances = JournalLineItem::with('thirdParty')
             SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid')
             ->first();
 
+        $grandTotals = JournalLineItem::where('third_party_id', $clientId)
+            ->selectRaw('
+        SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
+        SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit
+    ')
+            ->first();
+        $grandBalance = $grandTotals->total_debit - $grandTotals->total_credit;
+
         // Fetch the client details
         $client = ThirdParty::findOrFail($clientId);
 
-        return view('reports.client_specific', compact('balances', 'client', 'start_date', 'end_date', 'transactions'));
+        return view('reports.client_specific', compact('balances', 'grandTotals', 'grandBalance', 'client', 'start_date', 'end_date', 'transactions'));
     }
 }

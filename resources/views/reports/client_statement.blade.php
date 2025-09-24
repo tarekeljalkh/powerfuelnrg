@@ -1,5 +1,9 @@
 @extends('layouts.master')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+@endpush
+
 @section('content')
     <section class="section">
         <div class="section-header">
@@ -11,67 +15,89 @@
         </div>
 
         <div class="section-body">
+
+            <!-- Date Filter Form -->
+            <form action="{{ route('reports.client_statement') }}" method="GET" class="mb-4">
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" name="start_date" class="form-control flatpickr"
+                            value="{{ request('start_date') }}">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="end_date">End Date</label>
+                        <input type="date" name="end_date" class="form-control flatpickr"
+                            value="{{ request('end_date') }}">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="btn btn-primary btn-block">Filter</button>
+                    </div>
+                </div>
+            </form>
+
             <div id="statementContent" class="card">
                 <div class="card-header">
-                    <h4>Clients Who Owe Money</h4>
+                    <h4>
+                        Clients Who Owe Money
+                        @if (request('start_date') && request('end_date'))
+                            from {{ \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') }}
+                            to {{ \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') }}
+                        @endif
+                    </h4>
                 </div>
                 <div class="card-body">
                     @if (isset($balances) && !$balances->isEmpty())
-                        @php
-                            $totalDebit = 0;
-                            $totalCredit = 0;
-                            $totalBalance = 0;
-                        @endphp
-
                         <div class="table-responsive">
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
                                         <th>Client Name</th>
-                                        <th>Total Debit</th>
-                                        <th>Total Credit</th>
-                                        <th>Balance</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Debitors</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($balances as $balance)
                                         <tr>
-                                            <td>{{ $balance->thirdParty ? $balance->thirdParty->name : 'Unknown Client' }}
+                                            <td>{{ $balance->thirdParty?->name ?? 'Unknown Client' }}</td>
+
+                                            <!-- Totals for selected date range -->
+                                            <td>
+                                                {{ number_format(
+                                                    $balance->grand_total_debit - $balance->grand_total_credit - ($balance->total_due - $balance->total_paid),
+                                                    2,
+                                                ) }}
                                             </td>
-                                            <td>{{ number_format($balance->total_debit, 2) }}</td>
-                                            <td>{{ number_format($balance->total_credit, 2) }}</td>
-                                            <td>{{ number_format($balance->total_debit - $balance->total_credit, 2) }}</td>
+                                            <td>{{ number_format($balance->total_paid, 2) }}</td>
+
+                                            <!-- Totals for selected date range -->
+                                            <td>{{ number_format($balance->total_due, 2) }}</td>
+                                            <td>{{ number_format($balance->total_paid, 2) }}</td>
+
+                                            <!-- Debitors = grand total debit - grand total credit -->
+                                            <td>{{ number_format($balance->grand_total_debit - $balance->grand_total_credit, 2) }}
+                                            </td>
+
                                             <td>
                                                 @if ($balance->thirdParty)
                                                     <a href="{{ route('reports.client_specific', ['id' => $balance->thirdParty->id]) }}"
-                                                        class="btn btn-info">
-                                                        View Detailed Report
-                                                    </a>
+                                                        class="btn btn-info">View Detailed Report</a>
                                                 @else
                                                     <span class="text-muted">No client data available</span>
                                                 @endif
                                             </td>
                                         </tr>
-                                        @php
-                                            $totalDebit += $balance->total_debit;
-                                            $totalCredit += $balance->total_credit;
-                                            $totalBalance += $balance->total_debit - $balance->total_credit;
-                                        @endphp
                                     @endforeach
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th>Total</th>
-                                        <th>{{ number_format($totalDebit, 2) }}</th>
-                                        <th>{{ number_format($totalCredit, 2) }}</th>
-                                        <th>{{ number_format($totalBalance, 2) }}</th>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
                     @else
-                        <p>No clients owe money.</p>
+                        <p>No clients owe money for the selected date range.</p>
                     @endif
                 </div>
             </div>
@@ -82,16 +108,23 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         function printSection(divId) {
             var content = document.getElementById(divId).innerHTML;
             var originalContent = document.body.innerHTML;
-
             document.body.innerHTML = content;
             window.print();
-
-            // After printing, restore the original content
             document.body.innerHTML = originalContent;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr(".flatpickr", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                allowInput: true
+            });
+        });
     </script>
 @endpush

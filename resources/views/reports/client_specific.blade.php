@@ -83,6 +83,16 @@
                                     <th>{{ number_format($balances->total_paid, 2) }}</th>
                                     <th>{{ number_format($balances->total_due - $balances->total_paid, 2) }}</th>
                                 </tr>
+
+                                    <!-- Totals from day 0 to now (grand totals) -->
+    {{-- <tr>
+        <th>Grand Total (All Time)</th>
+        <th></th>
+        <th>{{ number_format($grandTotals->total_debit, 2) }}</th>
+        <th>{{ number_format($grandTotals->total_credit, 2) }}</th>
+        <th>{{ number_format($grandTotals->total_debit - $grandTotals->total_credit, 2) }}</th>
+    </tr> --}}
+
                             </tfoot>
                         </table>
                     </div>
