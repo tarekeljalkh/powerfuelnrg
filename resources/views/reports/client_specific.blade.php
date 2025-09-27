@@ -63,14 +63,14 @@
                                 @endphp
                                 @foreach ($transactions as $transaction)
                                     <tr>
-                                        <td>{{ \Carbon\Carbon::parse($transaction->journal->trans_date)->format('d/m/Y H:i') }}
+                                        <td>{{ \Carbon\Carbon::parse($transaction->journal->trans_date)->format('d/m/Y') }}
                                         </td>
                                         <td>{{ $transaction->description }}</td>
-                                        <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 2) }}
+                                        <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 3) }}
                                         </td>
-                                        <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 2) }}
+                                        <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 3) }}
                                         </td>
-                                        <td>{{ number_format($runningBalance += $transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount, 2) }}
+                                        <td>{{ number_format($runningBalance += $transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount, 3) }}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -79,19 +79,19 @@
                                 <tr>
                                     <th>Total</th>
                                     <th></th>
-                                    <th>{{ number_format($balances->total_due, 2) }}</th>
-                                    <th>{{ number_format($balances->total_paid, 2) }}</th>
-                                    <th>{{ number_format($balances->total_due - $balances->total_paid, 2) }}</th>
+                                    <th>{{ number_format($balances->total_due, 3) }}</th>
+                                    <th>{{ number_format($balances->total_paid, 3) }}</th>
+                                    <th>{{ number_format($balances->total_due - $balances->total_paid, 3) }}</th>
                                 </tr>
 
-                                    <!-- Totals from day 0 to now (grand totals) -->
-    {{-- <tr>
-        <th>Grand Total (All Time)</th>
-        <th></th>
-        <th>{{ number_format($grandTotals->total_debit, 2) }}</th>
-        <th>{{ number_format($grandTotals->total_credit, 2) }}</th>
-        <th>{{ number_format($grandTotals->total_debit - $grandTotals->total_credit, 2) }}</th>
-    </tr> --}}
+                                <!-- Totals from day 0 to now (grand totals) -->
+                                <tr>
+                                    <th>Grand Total (All Time)</th>
+                                    <th></th>
+                                    <th>{{ number_format($grandTotals->total_debit, 2) }}</th>
+                                    <th>{{ number_format($grandTotals->total_credit, 2) }}</th>
+                                    <th>{{ number_format($grandTotals->total_debit - $grandTotals->total_credit, 2) }}</th>
+                                </tr>
 
                             </tfoot>
                         </table>

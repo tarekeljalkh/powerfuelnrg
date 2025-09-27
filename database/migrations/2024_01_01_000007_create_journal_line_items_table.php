@@ -12,6 +12,7 @@ class CreateJournalLineItemsTable extends Migration
             $table->unsignedBigInteger('trans_id');  // Make sure this matches the type in journals table
             $table->unsignedBigInteger('ligne_id');
             $table->unsignedBigInteger('account_code'); // Change from string to unsignedBigInteger
+            $table->string('currency');
             $table->string('dc_indicator');
             $table->decimal('amount', 15, 2);
             $table->unsignedBigInteger('third_party_id')->nullable();

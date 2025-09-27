@@ -198,6 +198,25 @@ class VoucherController extends Controller
     }
 
 
+// public function clientBalanceReport(Request $request)
+// {
+//     // Optional: filter by client ID if provided
+//     $clientId = $request->get('client_id');
+
+//     // Fetch all transactions, optionally for a specific client
+// $transactions = JournalLineItem::select('journal_line_items.*', 'journals.trans_date as journal_date')
+//     ->join('journals', 'journals.trans_id', '=', 'journal_line_items.trans_id')
+//     ->when($clientId, function ($query) use ($clientId) {
+//         $query->where('third_party_id', $clientId);
+//     })
+//     ->orderBy('journals.trans_date')
+//     ->get();
+
+//     // Pass to the view
+//     return view('reports.filter', compact('transactions', 'clientId'));
+// }
+
+
     public function clientBalanceReport(Request $request)
     {
         // Get the default dates or use the provided ones
@@ -223,46 +242,62 @@ class VoucherController extends Controller
         return view('reports.filter', compact('balances', 'start_date', 'end_date'));
     }
 
-    public function clientSpecificReport(Request $request, $clientId)
-    {
-        // Default to current year start if no start_date is provided
-        $start_date = $request->get('start_date', now()->startOfYear()->toDateString());
-        $end_date = $request->get('end_date', now()->toDateString());
+public function clientSpecificReport(Request $request, $clientId)
+{
+    // Get optional date filters
+    $start_date = $request->get('start_date'); // nullable
+    $end_date = $request->get('end_date');     // nullable
 
-        // Fetch transactions within the date range
-        $transactions = \App\Models\JournalLineItem::with('journal')
-            ->where('third_party_id', $clientId)
-            ->whereHas('journal', function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('trans_date', [$start_date, $end_date]);
-            })
-            ->orderByDesc(
-                Journal::select('trans_date')
-                    ->whereColumn('journals.trans_id', 'journal_line_items.trans_id')
-                    ->limit(1)
-            )
-            ->get();
+    // Fetch transactions for the client, optionally filter by dates
+    $transactions = \App\Models\JournalLineItem::with('journal')
+        ->where('third_party_id', $clientId)
+        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+            $query->whereHas('journal', function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('trans_date', [$start_date, $end_date]);
+            });
+        })
+        ->orderByDesc(
+            Journal::select('trans_date')
+                ->whereColumn('journals.trans_id', 'journal_line_items.trans_id')
+                ->limit(1)
+        )
+        ->get();
 
-        // Calculate total due and total paid
-        $balances = JournalLineItem::where('third_party_id', $clientId)
-            ->whereHas('journal', function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('trans_date', [$start_date, $end_date]);
-            })
-            ->selectRaw('
+    // Calculate total due and total paid within date range if provided
+    $balances = JournalLineItem::where('third_party_id', $clientId)
+        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+            $query->whereHas('journal', function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('trans_date', [$start_date, $end_date]);
+            });
+        })
+        ->selectRaw('
             SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_due,
-            SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid')
-            ->first();
+            SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid
+        ')
+        ->first();
 
-        $grandTotals = JournalLineItem::where('third_party_id', $clientId)
-            ->selectRaw('
-        SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
-        SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit
-    ')
-            ->first();
-        $grandBalance = $grandTotals->total_debit - $grandTotals->total_credit;
+    // Grand totals (all time)
+    $grandTotals = JournalLineItem::where('third_party_id', $clientId)
+        ->selectRaw('
+            SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
+            SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit
+        ')
+        ->first();
 
-        // Fetch the client details
-        $client = ThirdParty::findOrFail($clientId);
+    $grandBalance = $grandTotals->total_debit - $grandTotals->total_credit;
 
-        return view('reports.client_specific', compact('balances', 'grandTotals', 'grandBalance', 'client', 'start_date', 'end_date', 'transactions'));
-    }
+    // Fetch the client details
+    $client = ThirdParty::findOrFail($clientId);
+
+    return view('reports.client_specific', compact(
+        'balances',
+        'grandTotals',
+        'grandBalance',
+        'client',
+        'start_date',
+        'end_date',
+        'transactions'
+    ));
+}
+
 }

@@ -53,11 +53,12 @@
                                 <thead>
                                     <tr>
                                         <th>Client Name</th>
-                                        <th>Debit</th>
-                                        <th>Credit</th>
-                                        <th>Debit</th>
-                                        <th>Credit</th>
-                                        <th>Debitors</th>
+                                        <th>Balance (Range)</th>
+                                        <th>Credit (Range)</th>
+                                        <th>Debit (Range)</th>
+                                        <th>Grand Credit (All Time)</th>
+                                        <th>Grand Debit (All Time)</th>
+                                        <th>Grand Balance (All Time)</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -66,22 +67,17 @@
                                         <tr>
                                             <td>{{ $balance->thirdParty?->name ?? 'Unknown Client' }}</td>
 
-                                            <!-- Totals for selected date range -->
-                                            <td>
-                                                {{ number_format(
-                                                    $balance->grand_total_debit - $balance->grand_total_credit - ($balance->total_due - $balance->total_paid),
-                                                    2,
-                                                ) }}
-                                            </td>
-                                            <td>{{ number_format($balance->total_paid, 2) }}</td>
+                                            <!-- Balance within selected date range -->
+                                            <td>{{ number_format($balance->balance_range, 2) }}</td>
 
-                                            <!-- Totals for selected date range -->
-                                            <td>{{ number_format($balance->total_due, 2) }}</td>
-                                            <td>{{ number_format($balance->total_paid, 2) }}</td>
+                                            {{-- <!-- Totals for selected date range -->
+                                            <td>{{ number_format($balance->total_credit_range, 2) }}</td>
+                                            <td>{{ number_format($balance->total_debit_range, 2) }}</td> --}}
 
-                                            <!-- Debitors = grand total debit - grand total credit -->
-                                            <td>{{ number_format($balance->grand_total_debit - $balance->grand_total_credit, 2) }}
-                                            </td>
+                                            <!-- Grand totals (all time) -->
+                                            <td>{{ number_format($balance->grand_total_credit, 2) }}</td>
+                                            <td>{{ number_format($balance->grand_total_debit, 2) }}</td>
+                                            <td>{{ number_format($balance->grand_balance, 2) }}</td>
 
                                             <td>
                                                 @if ($balance->thirdParty)
@@ -95,6 +91,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+
                         </div>
                     @else
                         <p>No clients owe money for the selected date range.</p>

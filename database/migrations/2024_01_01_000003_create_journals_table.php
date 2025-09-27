@@ -13,8 +13,8 @@ class CreateJournalsTable extends Migration
             $table->string('trans_code');
             $table->unsignedBigInteger('type_id');
             $table->string('manual_ref')->nullable();
-            $table->timestamp('trans_date')->nullable();
-            $table->timestamp('activation_date')->nullable();
+            $table->date('trans_date')->nullable();
+            $table->date('activation_date')->nullable();
             $table->boolean('locked')->default(false);
             $table->tinyInteger('status')->default(0);
             $table->unsignedBigInteger('parent_id')->nullable();

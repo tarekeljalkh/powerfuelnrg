@@ -11,7 +11,9 @@ use App\Models\TransactionType;
 use App\Models\Account;
 use App\Models\Currency;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Carbon\Carbon;
+use Carbon;
+use Carbon\Carbon as CarbonCarbon;
+use Illuminate\Support\Carbon as SupportCarbon;
 
 class ImportOldData extends Command
 {
@@ -97,6 +99,19 @@ class ImportOldData extends Command
             }
 
             try {
+
+                // Show the raw values from Excel
+                // $this->info("Raw TransDate: " . $row['TransDate']);
+                // $this->info("Raw ActivationDate: " . $row['ActivationDate']);
+
+                // // Optionally, convert the dates to timestamp format
+                // $transDate = $this->cleanDate($row['TransDate']);        // using your cleanDate() function
+                // $activationDate = $this->cleanDate($row['ActivationDate']);
+
+                // // Show the converted dates
+                // $this->info("Converted TransDate: " . $transDate);
+                // $this->info("Converted ActivationDate: " . $activationDate);
+
                 $journal = Journal::updateOrCreate(
                     ['trans_id' => $row['TransId']],
                     [
@@ -201,7 +216,7 @@ class ImportOldData extends Command
                         'account_code' => $row['AccCode'],
                         'dc_indicator' => $row['DC'],
                         'refenrece' => $row['Reference'],
-                        'currency' => $row['CURCODE'],
+                        'currency' => $row['CurCode'],
                         'amount' => $this->cleanNumericData($row['Amount']),
                         'third_party_id' => ThirdParty::where('id', $this->cleanNumericData($row['ThirdId']))->first()->id ?? null,
                         'created_by' => 1,
@@ -240,24 +255,87 @@ class ImportOldData extends Command
         return preg_replace('/[^\d.]/', '', $value);
     }
 
-    protected function cleanDate($date)
-    {
-        try {
-            // Use a regular expression to capture only the date part in the format dd/mm/yyyy
-            if (preg_match('/\d{2}\/\d{2}\/\d{4}/', $date, $matches)) {
-                // Parse the captured date string
-                return Carbon::createFromFormat('d/m/Y', $matches[0])->toDateTimeString();
-            } else {
-                // Log the error if the date doesn't match the expected pattern
-                $this->error("Failed to convert date: $date");
-                return null;
-            }
-        } catch (\Exception $e) {
+protected function cleanDate($date)
+{
+    try {
+        // Match 1 or 2 digits for month/day and 4 digits for year
+        if (preg_match('/\d{1,2}\/\d{1,2}\/\d{4}/', $date, $matches)) {
+            // Convert to Y-m-d (date only)
+            return Carbon\Carbon::createFromFormat('m/d/Y', $matches[0])->format('Y-m-d');
+        } else {
             $this->error("Failed to convert date: $date");
             return null;
         }
+    } catch (\Exception $e) {
+        $this->error("Failed to convert date: $date");
+        return null;
     }
+}
 
+    // protected function cleanDate($date)
+    // {
+    //     try {
+    //         // Use a regular expression to capture only the date part in the format dd/mm/yyyy
+    //         if (preg_match('/\d{2}\/\d{2}\/\d{4}/', $date, $matches)) {
+    //             // Parse the captured date string
+    //             return Carbon::createFromFormat('d/m/Y', $matches[0])->toDateTimeString();
+    //         } else {
+    //             // Log the error if the date doesn't match the expected pattern
+    //             $this->error("Failed to convert date: $date");
+    //             return null;
+    //         }
+    //     } catch (\Exception $e) {
+    //         $this->error("Failed to convert date: $date");
+    //         return null;
+    //     }
+    // }
+
+    // protected function cleanDate($date)
+    // {
+    //     try {
+    //         if (empty($date)) {
+    //             return null;
+    //         }
+
+    //         // Case 1: Excel numeric date (serial like 45678)
+    //         if (is_numeric($date)) {
+    //             return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($date)
+    //                 ->format('Y-m-d H:i:s');
+    //         }
+
+    //         // Case 2: dd/mm/yy or dd/mm/yyyy
+    //         if (preg_match('/\d{1,2}\/\d{1,2}\/(\d{2}|\d{4})/', $date, $matches)) {
+    //             $parts = explode('/', $matches[0]);
+
+    //             if (count($parts) === 3) {
+    //                 [$day, $month, $year] = $parts;
+
+    //                 // Fix 2-digit year
+    //                 if (strlen($year) === 2) {
+    //                     // Decide century: 70–99 => 19xx, 00–69 => 20xx
+    //                     $year = (int)$year >= 70 ? (1900 + (int)$year) : (2000 + (int)$year);
+    //                 }
+
+    //                 $fixedDate = sprintf('%02d/%02d/%04d', $day, $month, $year);
+
+    //                 return \Carbon\Carbon::createFromFormat('d/m/Y', $fixedDate)
+    //                     ->format('Y-m-d H:i:s');
+    //             }
+    //         }
+
+    //         // Case 3: ISO or other parseable format
+    //         if (strtotime($date)) {
+    //             return \Carbon\Carbon::parse($date)->format('Y-m-d H:i:s');
+    //         }
+
+    //         $this->error("Failed to convert date: $date");
+    //         return null;
+
+    //     } catch (\Exception $e) {
+    //         $this->error("Failed to convert date: $date");
+    //         return null;
+    //     }
+    // }
 
 
     protected function readExcel($path)
