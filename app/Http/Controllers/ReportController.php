@@ -25,59 +25,63 @@ class ReportController extends Controller
         return view('reports.client_balance', compact('balances'));
     }
 
-    public function clientStatementReport(Request $request)
-    {
-        $start_date = $request->input('start_date');
-        $end_date = $request->input('end_date');
+public function clientStatementReport(Request $request)
+{
+    $start_date = $request->input('start_date');
+    $end_date = $request->input('end_date');
 
-        // Fetch all clients who have journal entries
-        $clients = Journal::with('thirdParty')
-            ->join('journal_line_items', 'journals.trans_id', '=', 'journal_line_items.trans_id')
-            ->select('third_party_id')
-            ->groupBy('third_party_id')
-            ->get();
+    // Fetch all clients who have journal entries
+    $clients = Journal::with('thirdParty')
+        ->join('journal_line_items', 'journals.trans_id', '=', 'journal_line_items.trans_id')
+        ->select('third_party_id')
+        ->groupBy('third_party_id')
+        ->get();
 
-        $balances = collect();
+    $balances = collect();
 
-        foreach ($clients as $client) {
-            $clientId = $client->third_party_id;
+    foreach ($clients as $client) {
+        $clientId = $client->third_party_id;
 
-            // Totals within date range
-            $dateTotals = JournalLineItem::where('third_party_id', $clientId)
-                ->whereHas('journal', function ($query) use ($start_date, $end_date) {
-                    $query->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
-                        $q->whereBetween('trans_date', [$start_date, $end_date]);
-                    });
-                })
-                ->selectRaw('
-                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_due,
-                SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid
+        // Previous totals (before start date)
+        $previousTotals = JournalLineItem::where('third_party_id', $clientId)
+            ->when($start_date, function ($query) use ($start_date) {
+                $query->whereHas('journal', function ($q) use ($start_date) {
+                    $q->where('trans_date', '<', $start_date);
+                });
+            })
+            ->selectRaw('
+                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as prev_debit,
+                SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as prev_credit
             ')
-                ->first();
+            ->first();
 
-            // Grand totals (all time)
-            $grandTotals = JournalLineItem::where('third_party_id', $clientId)
-                ->selectRaw('
-                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
-                SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit
+        // Current period totals (between start and end date)
+        $currentTotals = JournalLineItem::where('third_party_id', $clientId)
+            ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+                $query->whereHas('journal', function ($q) use ($start_date, $end_date) {
+                    $q->whereBetween('trans_date', [$start_date, $end_date]);
+                });
+            })
+            ->selectRaw('
+                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as current_debit,
+                SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as current_credit,
+                SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) - SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as balance
             ')
-                ->first();
+            ->first();
 
-            // Only include clients who owe money in the date range
-            if ($dateTotals && ($dateTotals->total_due > $dateTotals->total_paid)) {
-                $balances->push((object)[
-                    'third_party_id' => $clientId,
-                    'thirdParty' => $client->thirdParty ?? null,
-                    'total_due' => $dateTotals->total_due ?? 0,
-                    'total_paid' => $dateTotals->total_paid ?? 0,
-                    'balance_range' => ($dateTotals->total_due ?? 0) - ($dateTotals->total_paid ?? 0),
-                    'grand_total_debit' => $grandTotals->total_debit ?? 0,
-                    'grand_total_credit' => $grandTotals->total_credit ?? 0,
-                    'grand_balance' => ($grandTotals->total_debit ?? 0) - ($grandTotals->total_credit ?? 0),
-                ]);
-            }
+        // Only include clients who owe money in the date range
+        if ($currentTotals && ($currentTotals->balance > 0 || ($previousTotals->prev_credit ?? 0) - ($previousTotals->prev_debit ?? 0) > 0)) {
+            $balances->push((object)[
+                'third_party_id' => $clientId,
+                'thirdParty' => $client->thirdParty ?? null,
+                'previousTotals' => $previousTotals,
+                'currentTotals' => $currentTotals,
+                'balance_range' => $currentTotals->balance ?? 0,
+                'grand_balance' => (($previousTotals->prev_credit ?? 0) - ($previousTotals->prev_debit ?? 0)) + ($currentTotals->balance ?? 0),
+            ]);
         }
-
-        return view('reports.client_statement', compact('balances', 'start_date', 'end_date'));
     }
+
+    return view('reports.client_statement', compact('balances', 'start_date', 'end_date'));
+}
 }

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\DataTables\VoucherDataTable;
 use App\Models\Account;
-use App\Models\Currency;
 use App\Models\Journal;
-use App\Models\JournalLineItem;
 use App\Models\Receipt;
+use App\Models\Currency;
 use App\Models\ThirdParty;
-use App\Models\TransactionType;
 use Illuminate\Http\Request;
+use App\Models\JournalLineItem;
+use App\Models\TransactionType;
+use Illuminate\Support\Facades\DB;
+use App\DataTables\VoucherDataTable;
 
 class VoucherController extends Controller
 {
@@ -198,23 +199,23 @@ class VoucherController extends Controller
     }
 
 
-// public function clientBalanceReport(Request $request)
-// {
-//     // Optional: filter by client ID if provided
-//     $clientId = $request->get('client_id');
+    // public function clientBalanceReport(Request $request)
+    // {
+    //     // Optional: filter by client ID if provided
+    //     $clientId = $request->get('client_id');
 
-//     // Fetch all transactions, optionally for a specific client
-// $transactions = JournalLineItem::select('journal_line_items.*', 'journals.trans_date as journal_date')
-//     ->join('journals', 'journals.trans_id', '=', 'journal_line_items.trans_id')
-//     ->when($clientId, function ($query) use ($clientId) {
-//         $query->where('third_party_id', $clientId);
-//     })
-//     ->orderBy('journals.trans_date')
-//     ->get();
+    //     // Fetch all transactions, optionally for a specific client
+    // $transactions = JournalLineItem::select('journal_line_items.*', 'journals.trans_date as journal_date')
+    //     ->join('journals', 'journals.trans_id', '=', 'journal_line_items.trans_id')
+    //     ->when($clientId, function ($query) use ($clientId) {
+    //         $query->where('third_party_id', $clientId);
+    //     })
+    //     ->orderBy('journals.trans_date')
+    //     ->get();
 
-//     // Pass to the view
-//     return view('reports.filter', compact('transactions', 'clientId'));
-// }
+    //     // Pass to the view
+    //     return view('reports.filter', compact('transactions', 'clientId'));
+    // }
 
 
     public function clientBalanceReport(Request $request)
@@ -244,11 +245,42 @@ class VoucherController extends Controller
 
 public function clientSpecificReport(Request $request, $clientId)
 {
-    // Get optional date filters
     $start_date = $request->get('start_date'); // nullable
-    $end_date = $request->get('end_date');     // nullable
+    $end_date   = $request->get('end_date');   // nullable
 
-    // Fetch transactions for the client, optionally filter by dates
+    // Default full range
+    $fullStart = '1990-01-01';
+    $fullEnd   = now()->format('Y-m-d');
+
+    // Previous totals (before start_date)
+    $previousTotals = DB::table('journal_line_items as jli')
+        ->join('journals as j', 'j.trans_id', '=', 'jli.trans_id')
+        ->where('jli.third_party_id', $clientId)
+        ->when($start_date, function ($query) use ($start_date) {
+            $query->where('j.trans_date', '<', $start_date);
+        })
+        ->selectRaw('
+            SUM(CASE WHEN jli.dc_indicator = "D" THEN jli.amount ELSE 0 END) AS prev_debit,
+            SUM(CASE WHEN jli.dc_indicator = "C" THEN jli.amount ELSE 0 END) AS prev_credit
+        ')
+        ->first();
+
+    // Current period totals (start_date → end_date)
+    $currentTotals = DB::table('journal_line_items as jli')
+        ->join('journals as j', 'j.trans_id', '=', 'jli.trans_id')
+        ->where('jli.third_party_id', $clientId)
+        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
+            $query->whereBetween('j.trans_date', [$start_date, $end_date]);
+        })
+        ->selectRaw('
+            SUM(CASE WHEN jli.dc_indicator = "D" THEN jli.amount ELSE 0 END) AS current_debit,
+            SUM(CASE WHEN jli.dc_indicator = "C" THEN jli.amount ELSE 0 END) AS current_credit,
+            SUM(CASE WHEN jli.dc_indicator = "D" THEN jli.amount ELSE 0 END)
+              - SUM(CASE WHEN jli.dc_indicator = "C" THEN jli.amount ELSE 0 END) AS balance
+        ')
+        ->first();
+
+    // Transactions for the current period (for table rows)
     $transactions = \App\Models\JournalLineItem::with('journal')
         ->where('third_party_id', $clientId)
         ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
@@ -256,48 +288,18 @@ public function clientSpecificReport(Request $request, $clientId)
                 $q->whereBetween('trans_date', [$start_date, $end_date]);
             });
         })
-        ->orderByDesc(
-            Journal::select('trans_date')
-                ->whereColumn('journals.trans_id', 'journal_line_items.trans_id')
-                ->limit(1)
-        )
         ->get();
 
-    // Calculate total due and total paid within date range if provided
-    $balances = JournalLineItem::where('third_party_id', $clientId)
-        ->when($start_date && $end_date, function ($query) use ($start_date, $end_date) {
-            $query->whereHas('journal', function ($q) use ($start_date, $end_date) {
-                $q->whereBetween('trans_date', [$start_date, $end_date]);
-            });
-        })
-        ->selectRaw('
-            SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_due,
-            SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_paid
-        ')
-        ->first();
+    $client = \App\Models\ThirdParty::findOrFail($clientId);
 
-    // Grand totals (all time)
-    $grandTotals = JournalLineItem::where('third_party_id', $clientId)
-        ->selectRaw('
-            SUM(CASE WHEN dc_indicator = "D" THEN amount ELSE 0 END) as total_debit,
-            SUM(CASE WHEN dc_indicator = "C" THEN amount ELSE 0 END) as total_credit
-        ')
-        ->first();
-
-    $grandBalance = $grandTotals->total_debit - $grandTotals->total_credit;
-
-    // Fetch the client details
-    $client = ThirdParty::findOrFail($clientId);
-
-    return view('reports.client_specific', compact(
-        'balances',
-        'grandTotals',
-        'grandBalance',
-        'client',
-        'start_date',
-        'end_date',
-        'transactions'
-    ));
+    return view('reports.client_specific', [
+        'previousTotals' => $previousTotals,
+        'currentTotals'  => $currentTotals,
+        'transactions'   => $transactions,
+        'client'         => $client,
+        'start_date'     => $start_date,
+        'end_date'       => $end_date,
+    ]);
 }
 
 }
