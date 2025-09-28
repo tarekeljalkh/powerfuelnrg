@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\ThirdParty;
 use Illuminate\Http\Request;
+use Carbon;
 
 class DashboardController extends Controller
 {
@@ -19,15 +20,19 @@ class DashboardController extends Controller
     {
         $clients = ThirdParty::all()->count();
         // Fetch clients whose total debit is greater than total credit
-        $balances = Journal::with('thirdParty')
-            ->join('journal_line_items', 'journals.trans_id', '=', 'journal_line_items.trans_id')
-            ->selectRaw('third_party_id, sum(case when dc_indicator = "D" then amount else 0 end) as total_debit, sum(case when dc_indicator = "C" then amount else 0 end) as total_credit')
-            ->groupBy('third_party_id')
-            ->havingRaw('sum(case when dc_indicator = "D" then amount else 0 end) > sum(case when dc_indicator = "C" then amount else 0 end)') // Only clients who owe money
-            ->get();
-            $vouchers = Journal::where('trans_code', 'Jv')->count();
-            $receipts = Journal::where('trans_code', 'Rv')->count();
-            return view('dashboard', compact('clients', 'balances', 'vouchers', 'receipts'));
+        // $balances = Journal::with('thirdParty')
+        //     ->join('journal_line_items', 'journals.trans_id', '=', 'journal_line_items.trans_id')
+        //     ->selectRaw('third_party_id, sum(case when dc_indicator = "D" then amount else 0 end) as total_debit, sum(case when dc_indicator = "C" then amount else 0 end) as total_credit')
+        //     ->groupBy('third_party_id')
+        //     ->havingRaw('sum(case when dc_indicator = "D" then amount else 0 end) > sum(case when dc_indicator = "C" then amount else 0 end)') // Only clients who owe money
+        //     ->get();
+        $vouchers = Journal::where('trans_code', 'Jv')
+            ->whereDate('trans_date', '>=', '2025-01-01')
+            ->count();
+        $receipts = Journal::where('trans_code', 'RV')
+            ->whereDate('trans_date', '>=', '2025-01-01')
+            ->count();
+        return view('dashboard', compact('clients', 'vouchers', 'receipts'));
     }
 
 

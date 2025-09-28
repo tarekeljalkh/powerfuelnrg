@@ -42,7 +42,10 @@ class VoucherDataTable extends DataTable
             ->with('transactionType') // Ensure the transactionType relationship is loaded
             ->whereHas('transactionType', function ($query) {
                 $query->where('trans_code', 'Jv'); // Filter by trans_code 'JV'
-            });
+            })
+            ->whereDate('trans_date', '>=', '2025-01-01') // filter from 1/1/2025
+            ->orderBy('trans_date', 'desc'); // latest first
+        ;
     }
 
     /**

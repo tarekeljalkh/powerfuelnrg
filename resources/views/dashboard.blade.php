@@ -39,7 +39,7 @@
                                 <h4>Pending Balance</h4>
                             </div>
                             <div class="card-body">
-                                {{ $balances->count() }}
+
                             </div>
                         </div>
                     </div>
