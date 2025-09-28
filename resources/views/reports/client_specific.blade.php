@@ -79,7 +79,6 @@
                                     <td>{{ \Carbon\Carbon::parse($transaction->journal->trans_date)->format('d/m/Y') }}</td>
                                     <td>0</td>
                                     <td>0</td>
-                                    <td>0</td>
                                     <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 3) }}</td>
                                     <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 3) }}</td>
                                     <td>{{ number_format($runningBalance += $transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount, 3) }}</td>

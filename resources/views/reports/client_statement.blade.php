@@ -88,7 +88,7 @@
         <td>0</td>
         <td>{{ number_format($currDebit, 3) }}</td>
         <td>{{ number_format($currCredit, 3) }}</td>
-        <td>{{ number_format($currBalance, 3) }}</td>
+        <td>{{ number_format($currBalance + $prevDebit - $prevCredit, 3) }}</td>
         <td>
             <a href="{{ route('reports.client_specific', ['id' => $balance->third_party_id]) }}" class="btn btn-info">
                 View Detailed Report

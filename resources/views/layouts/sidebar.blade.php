@@ -46,11 +46,11 @@
             <li class="menu-header">Reports</li>
 
             <!-- Client Balance Report (Filter) -->
-            <li class="{{ request()->routeIs('reports.filter') ? 'active' : '' }}">
+            {{-- <li class="{{ request()->routeIs('reports.filter') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('reports.filter') }}">
                     <i class="fas fa-chart-line"></i> <span>Client Balance Report</span>
                 </a>
-            </li>
+            </li> --}}
 
             <!-- Add the Client Statement Report Here -->
             <li class="{{ request()->routeIs('reports.client_statement') ? 'active' : '' }}">

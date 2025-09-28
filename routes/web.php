@@ -67,7 +67,7 @@ Route::middleware('auth')->group(function () {
     })->name('reports.filter');
 
     // Client Balance Report (Overall for all clients)
-    Route::get('/reports/client-balance', [VoucherController::class, 'clientBalanceReport'])->name('reports.client_balance');
+    // Route::get('/reports/client-balance', [VoucherController::class, 'clientBalanceReport'])->name('reports.client_balance');
     Route::get('/reports/client-statement', [ReportController::class, 'clientStatementReport'])->name('reports.client_statement');
 
     // Specific Client Balance Report
