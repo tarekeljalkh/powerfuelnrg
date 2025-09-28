@@ -21,13 +21,11 @@
             <div class="row">
                 <div class="form-group col-md-4">
                     <label for="start_date">Start Date</label>
-                    <input type="date" name="start_date" class="form-control flatpickr"
-                        value="{{ $start_date }}">
+                    <input type="date" name="start_date" class="form-control flatpickr" value="{{ $start_date }}">
                 </div>
                 <div class="form-group col-md-4">
                     <label for="end_date">End Date</label>
-                    <input type="date" name="end_date" class="form-control flatpickr"
-                        value="{{ $end_date }}">
+                    <input type="date" name="end_date" class="form-control flatpickr" value="{{ $end_date }}">
                 </div>
                 <div class="form-group col-md-4">
                     <label>&nbsp;</label>
@@ -36,6 +34,7 @@
             </div>
         </form>
 
+        <!-- Statement Table -->
         <div id="statementContent" class="card">
             <div class="card-header">
                 <h4>
@@ -48,6 +47,11 @@
             </div>
             <div class="card-body">
                 @if ($balances && $balances->isNotEmpty())
+                    @php
+                        $grandDebit = 0;
+                        $grandCredit = 0;
+                        $grandBalance = 0;
+                    @endphp
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
@@ -58,39 +62,52 @@
                                     <th>Current Debit</th>
                                     <th>Current Credit</th>
                                     <th>Balance</th>
-                                    <th>Grand Balance</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($balances as $balance)
-                                    @php
-                                        $prevDebit  = $balance->previousTotals->prev_debit ?? 0;
-                                        $prevCredit = $balance->previousTotals->prev_credit ?? 0;
-                                        $currDebit  = $balance->currentTotals->current_debit ?? 0;
-                                        $currCredit = $balance->currentTotals->current_credit ?? 0;
-                                        $currBalance = $balance->currentTotals->balance ?? 0;
-                                        $grandBalance = $balance->grand_balance ?? 0;
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $balance->thirdParty?->name ?? 'Unknown Client' }}</td>
-                                        <td>{{ number_format($prevDebit, 2) }}</td>
-                                        <td>{{ number_format($prevCredit, 2) }}</td>
-                                        <td>{{ number_format($currDebit, 2) }}</td>
-                                        <td>{{ number_format($currCredit, 2) }}</td>
-                                        <td>{{ number_format($currBalance, 2) }}</td>
-                                        <td>{{ number_format($grandBalance, 2) }}</td>
-                                        <td>
-                                            @if ($balance->thirdParty)
-                                                <a href="{{ route('reports.client_specific', ['id' => $balance->thirdParty->id]) }}"
-                                                    class="btn btn-info">View Detailed Report</a>
-                                            @else
-                                                <span class="text-muted">No client data available</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
+@foreach ($balances as $balance)
+    @php
+        $prev = $previousTotals[$balance->third_party_id] ?? null;
+        $prevDebit = $prev->prev_debit ?? 0;
+        $prevCredit = $prev->prev_credit ?? 0;
+
+        $currDebit = $balance->total_debit ?? 0;
+        $currCredit = $balance->total_credit ?? 0;
+        $currBalance = $balance->balance ?? 0;
+
+        if ($currDebit == 0 && $currCredit == 0 && $currBalance == 0) continue;
+
+        $grandDebit += $currDebit;
+        $grandCredit += $currCredit;
+        $grandBalance += $currBalance;
+    @endphp
+    <tr>
+        <td>{{ $balance->client_name }}</td>
+        <td>{{ number_format($prevDebit - $prevCredit, 3) }}</td>
+        <td>0</td>
+        <td>{{ number_format($currDebit, 3) }}</td>
+        <td>{{ number_format($currCredit, 3) }}</td>
+        <td>{{ number_format($currBalance, 3) }}</td>
+        <td>
+            <a href="{{ route('reports.client_specific', ['id' => $balance->third_party_id]) }}" class="btn btn-info">
+                View Detailed Report
+            </a>
+        </td>
+    </tr>
+@endforeach
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Total</th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>{{ number_format($grandDebit, 2) }}</th>
+                                    <th>{{ number_format($grandCredit, 2) }}</th>
+                                    <th>{{ number_format($grandBalance, 2) }}</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 @else
