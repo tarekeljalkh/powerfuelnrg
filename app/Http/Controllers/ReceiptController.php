@@ -36,7 +36,6 @@ class ReceiptController extends Controller
             'type_id' => 'required|exists:transaction_types,id',  // Validate type_id to ensure it exists in transaction_types table
             'trx_ref' => 'required|string|max:50',
             'trx_date' => 'nullable|date',  // Allow null and date format
-            'activation_date' => 'nullable|date',  // Allow null and date format
             'line_items.*.account' => 'required|string',
             'line_items.*.currency' => 'required|string',
             'line_items.*.dc_indicator' => 'required|string',
@@ -55,7 +54,7 @@ class ReceiptController extends Controller
             'type_id' => $request->type_id,
             'manual_ref' => $request->trx_ref,
             'trans_date' => $request->trx_date ?? $currentDate,  // Use provided date or current date
-            'activation_date' => $request->activation_date ?? $currentDate,  // Use provided date or current date
+            'activation_date' => $request->trx_date ?? $currentDate,  // Use provided date or current date
             'locked' => false,
             'created_by' => auth()->user()->id,
         ]);
@@ -84,7 +83,7 @@ class ReceiptController extends Controller
 
     public function show($id)
     {
-        $receipt = Journal::with('lineItems')->findOrFail($id);
+    $receipt = Journal::with(['lineItems.account', 'lineItems.thirdParty'])->findOrFail($id);
         return view('receipts.show', compact('receipt'));
     }
 
@@ -106,7 +105,6 @@ class ReceiptController extends Controller
             'type_id' => 'required|exists:transaction_types,id',  // Validate type_id to ensure it exists in transaction_types table
             'trx_ref' => 'required|string|max:50',
             'trans_date' => 'nullable|date',  // Allow null and date format
-            'activation_date' => 'nullable|date',  // Allow null and date format
             'line_items.*.account' => 'required|string',
             'line_items.*.currency' => 'required|string',
             'line_items.*.dc_indicator' => 'required|string',
@@ -125,7 +123,7 @@ class ReceiptController extends Controller
             'type_id' => $request->type_id,
             'manual_ref' => $request->trx_ref,
             'trans_date' => $request->trans_date ?? now(),
-            'activation_date' => $request->activation_date ?? now(),
+            'activation_date' => $request->trans_date ?? now(),
             'locked' => false,
             'created_by' => auth()->user()->id,
         ]);

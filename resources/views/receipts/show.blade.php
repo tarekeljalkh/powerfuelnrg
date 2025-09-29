@@ -24,36 +24,52 @@
                     <table class="table table-bordered">
                         <tr>
                             <th>Transaction Code</th>
-                            <td>{{ $receipt->journal->trans_code ?? 'N/A' }}</td> <!-- Display transaction code -->
-                        </tr>
-                        <tr>
-                            <th>Client (Third Party)</th>
-                            <td>{{ $receipt->thirdParty->name ?? 'None' }}</td> <!-- Display client/third party -->
-                        </tr>
-                        <tr>
-                            <th>Amount</th>
-                            <td>{{ number_format($receipt->amount, 2) }}</td> <!-- Format amount to 2 decimals -->
+                            <td>{{ $receipt->journal->trans_code ?? 'N/A' }}</td>
                         </tr>
                         <tr>
                             <th>Date</th>
-                            <td>{{ \Carbon\Carbon::parse($receipt->date)->format('Y-m-d') }}</td> <!-- Format date -->
+                            <td>{{ \Carbon\Carbon::parse($receipt->date)->format('Y-m-d') }}</td>
                         </tr>
                         <tr>
                             <th>Payment Method</th>
-                            <td>{{ $receipt->payment_method ?? 'N/A' }}</td> <!-- Handle null payment method -->
+                            <td>{{ $receipt->payment_method ?? 'N/A' }}</td>
                         </tr>
                         <tr>
                             <th>Created By</th>
-                            <td>{{ $receipt->creator->name ?? 'System' }}</td> <!-- Display creator -->
+                            <td>{{ $receipt->creator ?? 'System' }}</td>
                         </tr>
                     </table>
 
-                    <!-- Allocations or Other Relevant Details (Optional Section) -->
-                    <!-- If there are allocations or additional details for the receipt, you can add them here -->
+                    <!-- Journal Line Items -->
+                    <h5 class="mt-4">Journal Line Items</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Account Code</th>
+                                <th>Third Party</th>
+                                <th>Debit</th>
+                                <th>Credit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($receipt->lineItems as $item)
+                                <tr>
+                                    <td>{{ $item->account_code }}</td>
+                                    <td>{{ $item->thirdParty->name ?? 'N/A' }}</td>
+                                    <td>{{ $item->dc_indicator === 'D' ? number_format($item->amount, 2) : '-' }}</td>
+                                    <td>{{ $item->dc_indicator === 'C' ? number_format($item->amount, 2) : '-' }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center">No line items found</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
                 <div class="card-footer text-right">
-                    <a href="{{ route('receipts.edit', $receipt->id) }}" class="btn btn-warning">Edit</a>
-                    <form action="{{ route('receipts.destroy', $receipt->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this receipt?');">
+                    <a href="{{ route('receipts.edit', $receipt) }}" class="btn btn-warning">Edit</a>
+                    <form action="{{ route('receipts.destroy', $receipt) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this receipt?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Delete</button>

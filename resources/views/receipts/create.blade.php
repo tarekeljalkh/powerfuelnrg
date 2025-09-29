@@ -188,9 +188,11 @@
                                                         <select name="line_items[0][account]" class="form-control select2"
                                                             required="">
                                                             @foreach ($accounts as $account)
-                                                                <option value="{{ $account->account_code }}">
+                                                                <option value="{{ $account->account_code }}"
+                                                                    {{ $account->account_code == '41110' ? 'selected' : '' }}>
                                                                     {{ $account->account_code }}
-                                                                    {{ $account->account_name }}</option>
+                                                                    {{ $account->account_name }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
@@ -198,9 +200,12 @@
                                                         <select name="line_items[0][currency]" class="form-control"
                                                             required="">
                                                             @foreach ($currencies as $currency)
-                                                                <option value="{{ $currency->id }}">
-                                                                    {{ $currency->currency_code }}</option>
+                                                                <option value="{{ $currency->id }}"
+                                                                    {{ $currency->currency_code == 'USD' ? 'selected' : '' }}>
+                                                                    {{ $currency->currency_code }}
+                                                                </option>
                                                             @endforeach
+                                                        </select>
                                                         </select>
                                                     </td>
                                                     <td><input type="text" name="line_items[0][reference]"

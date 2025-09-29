@@ -40,4 +40,11 @@ class JournalLineItem extends Model
     {
         return $this->belongsTo(Currency::class, 'currency', 'id');
     }
+
+    public function account()
+{
+    return $this->belongsTo(Account::class, 'account_code', 'account_code');
+}
+
+
 }

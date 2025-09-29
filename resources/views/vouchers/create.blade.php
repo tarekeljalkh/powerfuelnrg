@@ -153,11 +153,6 @@
                                         <input type="date" name="trx_date" class="form-control flatpickr"
                                             value="{{ old('trx_date', now()->toDateString()) }}" required="">
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Activation Date</label>
-                                        <input type="date" name="activation_date" class="form-control flatpickr"
-                                            value="{{ old('activation_date', now()->toDateString()) }}" required="">
-                                    </div>
                                 </div>
 
                                 <!-- Line Items Section -->
@@ -184,9 +179,11 @@
                                                         <select name="line_items[0][account]" class="form-control select2"
                                                             required="">
                                                             @foreach ($accounts as $account)
-                                                                <option value="{{ $account->account_code }}">
-                                                                    {{ $account->account_code }}
-                                                                    {{ $account->account_name }}</option>
+                                                                <option value="{{ $account->account_code }}"
+                                                                    {{ $account->account_code == '41110' ? 'selected' : '' }}>
+                                                                    {{ $account->account_code }} -
+                                                                    {{ $account->account_name }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
@@ -194,8 +191,10 @@
                                                         <select name="line_items[0][currency]" class="form-control"
                                                             required="">
                                                             @foreach ($currencies as $currency)
-                                                                <option value="{{ $currency->id }}">
-                                                                    {{ $currency->currency_code }}</option>
+                                                                <option value="{{ $currency->id }}"
+                                                                    {{ $currency->currency_code == 'USD' ? 'selected' : '' }}>
+                                                                    {{ $currency->currency_code }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>
