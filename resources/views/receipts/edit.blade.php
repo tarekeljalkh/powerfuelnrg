@@ -147,7 +147,7 @@
                                     <div class="form-group col-md-6">
                                         <label>Transaction Reference</label>
                                         <input type="text" name="trx_ref" class="form-control"
-                                            value="{{ old('trx_ref', $receipt->trx_ref) }}" required="">
+                                            value="{{ old('trx_ref', $receipt->manual_ref) }}" required="">
                                     </div>
                                 </div>
                                 <div class="row">
@@ -155,13 +155,6 @@
                                         <label>Transaction Date</label>
                                         <input type="date" name="trans_date" class="form-control flatpickr"
                                             value="{{ \Illuminate\Support\Carbon::parse($receipt->trans_date)->toDateString() }}"
-                                            required="">
-                                    </div>
-
-                                    <div class="form-group col-md-6">
-                                        <label>Activation Date</label>
-                                        <input type="date" name="activation_date" class="form-control flatpickr"
-                                            value="{{ \Illuminate\Support\Carbon::parse($receipt->activation_date)->toDateString() }}"
                                             required="">
                                     </div>
                                 </div>
@@ -192,7 +185,7 @@
                                                                 class="form-control select2" required="">
                                                                 @foreach ($accounts as $account)
                                                                     <option value="{{ $account->account_code }}"
-                                                                        {{ $item->account == $account->account_code ? 'selected' : '' }}>
+                                                                        {{ $item->account_code == $account->account_code ? 'selected' : '' }}>
                                                                         {{ $account->account_code }}
                                                                         {{ $account->account_name }}
                                                                     </option>
@@ -203,8 +196,8 @@
                                                             <select name="line_items[{{ $index }}][currency]"
                                                                 class="form-control" required="">
                                                                 @foreach ($currencies as $currency)
-                                                                    <option value="{{ $currency->id }}"
-                                                                        {{ $item->currency == $currency->id ? 'selected' : '' }}>
+                                                                    <option value="{{ $currency->currency_code }}"
+                                                                        {{ $item->currency == $currency->currency_code ? 'selected' : '' }}>
                                                                         {{ $currency->currency_code }}
                                                                     </option>
                                                                 @endforeach

@@ -149,7 +149,7 @@
                                     <div class="form-group col-md-6">
                                         <label>Transaction Reference</label>
                                         <input type="text" name="trx_ref" class="form-control"
-                                            value="{{ $voucher->manual_ref }}" required="">
+                                            value="{{ old('trx_ref', $voucher->manual_ref) }}" required="">
                                     </div>
                                 </div>
 
@@ -158,12 +158,6 @@
                                         <label>Transaction Date</label>
                                         <input type="date" name="trx_date" class="form-control"
                                             value="{{ \Carbon\Carbon::parse($voucher->trans_date)->format('Y-m-d') }}"
-                                            required="">
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Activation Date</label>
-                                        <input type="date" name="activation_date" class="form-control"
-                                            value="{{ \Carbon\Carbon::parse($voucher->activation_date)->format('Y-m-d') }}"
                                             required="">
                                     </div>
                                 </div>
@@ -205,8 +199,8 @@
                                                             <select name="line_items[{{ $index }}][currency]"
                                                                 class="form-control" required="">
                                                                 @foreach ($currencies as $currency)
-                                                                    <option value="{{ $currency->id }}"
-                                                                        {{ $item->currency == $currency->id ? 'selected' : '' }}>
+                                                                    <option value="{{ $currency->currency_code }}"
+                                                                        {{ $item->currency == $currency->currency_code ? 'selected' : '' }}>
                                                                         {{ $currency->currency_code }}
                                                                     </option>
                                                                 @endforeach

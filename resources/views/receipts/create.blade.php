@@ -157,11 +157,6 @@
                                         <input type="date" name="trx_date" class="form-control flatpickr"
                                             value="{{ old('trx_date', now()->toDateString()) }}" required="">
                                     </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Activation Date</label>
-                                        <input type="date" name="activation_date" class="form-control flatpickr"
-                                            value="{{ old('activation_date', now()->toDateString()) }}" required="">
-                                    </div>
                                 </div>
 
                                 <!-- Line Items Section -->
@@ -200,7 +195,7 @@
                                                         <select name="line_items[0][currency]" class="form-control"
                                                             required="">
                                                             @foreach ($currencies as $currency)
-                                                                <option value="{{ $currency->id }}"
+                                                                <option value="{{ $currency->currency_code }}"
                                                                     {{ $currency->currency_code == 'USD' ? 'selected' : '' }}>
                                                                     {{ $currency->currency_code }}
                                                                 </option>

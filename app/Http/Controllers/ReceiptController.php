@@ -123,7 +123,6 @@ class ReceiptController extends Controller
             'type_id' => $request->type_id,
             'manual_ref' => $request->trx_ref,
             'trans_date' => $request->trans_date ?? now(),
-            'activation_date' => $request->trans_date ?? now(),
             'locked' => false,
             'created_by' => auth()->user()->id,
         ]);

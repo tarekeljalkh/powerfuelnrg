@@ -15,6 +15,8 @@ class Receipt extends Model
         'receipt_number',
         'manual_ref',
         'amount',
+        'account_code',
+        'currency',
         'date',
         'payment_method',
         'created_by'

@@ -191,7 +191,7 @@
                                                         <select name="line_items[0][currency]" class="form-control"
                                                             required="">
                                                             @foreach ($currencies as $currency)
-                                                                <option value="{{ $currency->id }}"
+                                                                <option value="{{ $currency->currency_code }}"
                                                                     {{ $currency->currency_code == 'USD' ? 'selected' : '' }}>
                                                                     {{ $currency->currency_code }}
                                                                 </option>
