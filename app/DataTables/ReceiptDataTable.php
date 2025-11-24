@@ -31,19 +31,76 @@ class ReceiptDataTable extends DataTable
     /**
      * Get the query source of dataTable.
      */
+    // public function query(Journal $model): QueryBuilder
+    // {
+    //     // Filter journals where the transaction type is "receipt"
+    //     // Fetch journals where the related transactionType has a trans_code of 'JV'
+    //     return $model->newQuery()
+    //         ->with('transactionType') // Ensure the transactionType relationship is loaded
+    //         ->whereHas('transactionType', function ($query) {
+    //             $query->where('trans_code', 'Rv'); // Filter by trans_code 'JV'
+    //         })
+    //         ->whereDate('trans_date', '>=', '2025-01-01') // filter from 1/1/2025
+    //         ->orderBy('trans_date', 'desc'); // latest first
+    //     ;
+    // }
+
     public function query(Journal $model): QueryBuilder
-    {
-        // Filter journals where the transaction type is "receipt"
-        // Fetch journals where the related transactionType has a trans_code of 'JV'
-        return $model->newQuery()
-            ->with('transactionType') // Ensure the transactionType relationship is loaded
-            ->whereHas('transactionType', function ($query) {
-                $query->where('trans_code', 'Rv'); // Filter by trans_code 'JV'
-            })
-            ->whereDate('trans_date', '>=', '2025-01-01') // filter from 1/1/2025
-            ->orderBy('trans_date', 'desc'); // latest first
-        ;
+{
+    $request = request();
+
+     $start_date = $request->input('start_date', now()->startOfYear()->format('Y-m-d'));
+        $end_date   = $request->input('end_date', now()->format('Y-m-d'));
+
+    $query = $model->newQuery()
+        ->from('journals as j')
+        ->join('journal_line_items as jli', 'j.trans_id', '=', 'jli.trans_id')
+        ->join('third_parties as tp', 'jli.third_party_id', '=', 'tp.id') 
+        ->selectRaw('
+            tp.name as client_name,
+            jli.trans_id,
+             trans_code,
+            j.manual_ref,
+            jli.reference,
+            jli.description,
+            jli.amount,
+            jli.currency,
+            jli.third_party_id,
+            j.trans_date,
+            DATE_FORMAT(j.trans_date, "%d/%m/%Y") AS formated_trans_date
+        ')
+        ->where('trans_code', 'Rv')
+        ->whereDate('j.trans_date', '>=', $start_date)
+        ->whereDate('j.trans_date', '<=', $end_date)
+        ->orderBy('j.trans_date', 'asc');
+
+   if ($request->filled('start_date')) {
+        $query->whereDate('j.trans_date', '>=', $start_date);
     }
+
+    // To date
+    if ($request->filled('end_date')) {
+        $query->whereDate('j.trans_date', '<=', $end_date);
+    }
+
+     // Client name (third_parties.name)
+     if ($request->filled('third_party_id')) {
+        //$query->where('tp.name', 'like', '%' . $request->get('client_name') . '%');
+         $query->where('jli.third_party_id', $request->get('third_party_id'));
+     }
+
+    // Manual reference (journals.manual_ref)
+    if ($request->filled('manual_ref')) {
+        $query->where('j.manual_ref', 'like', '%' . $request->get('manual_ref') . '%');
+    }
+
+    // Description (journal_line_items.description)
+    if ($request->filled('reference')) {
+            $query->where('jli.reference', 'like', '%' . $request->get('reference') . '%');
+        }
+
+    return $query;
+}
 
     /**
      * Optional method if you want to use the html builder.
@@ -67,6 +124,10 @@ class ReceiptDataTable extends DataTable
                 Button::make('print'),
                 Button::make('colvis')  // Column visibility button
             ])
+            ->parameters([
+            'pageLength' => 50, // default rows per page
+            'lengthMenu' => [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+        ])
             ->responsive(true);  // Enable responsive behavior
     }
 
@@ -76,10 +137,13 @@ class ReceiptDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('trans_id')->title('Transaction ID'),
-            Column::make('trans_code')->title('Transaction Code'),
-            Column::make('manual_ref')->title('Manual Reference'),
-            Column::make('trans_date')->title('Transaction Date'),
+            Column::make('formated_trans_date')->title('Payment Date'), 
+            Column::make('trans_code')->title('Trans Code'),
+            Column::make('client_name')->title('Client'),
+            Column::make('manual_ref')->title('Payment Method'),
+            Column::make('reference')->title('Reference'),
+            Column::make('currency')->title('Currency'),
+            Column::make('amount')->title('Amount'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)

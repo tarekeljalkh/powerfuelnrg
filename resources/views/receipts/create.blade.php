@@ -167,12 +167,13 @@
                                             <thead>
                                                 <tr>
                                                     <th>Account</th>
-                                                    <th>Currency</th>
-                                                    <th>Reference</th>
-                                                    <th>Description</th>
-                                                    <th>Debit/Credit</th>
-                                                    <th>Amount</th>
                                                     <th>Third Party</th>
+                                                    
+                                                    <th>Reference</th>
+                                                    
+                                                    <th>Credit</th>
+                                                    <th>Amount</th>
+                                                    <th>Currency</th>
                                                     <th><button type="button" class="btn btn-success add-row">+</button>
                                                     </th>
                                                 </tr>
@@ -191,7 +192,30 @@
                                                             @endforeach
                                                         </select>
                                                     </td>
+                                                     <td>
+                                                        <select name="line_items[0][third_party_id]"
+                                                            class="form-control select2">
+                                                            @foreach ($thirdParties as $thirdParty)
+                                                                <option value="{{ $thirdParty->id }}">
+                                                                    {{ $thirdParty->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" name="line_items[0][reference]"
+                                                            class="form-control"></td>
+                                                    
+                                                    
+                                                    
                                                     <td>
+                                                        <select name="line_items[0][dc_indicator]" class="form-control"
+                                                            required="">
+                                                             
+                                                            <option value="C">Credit</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" name="line_items[0][amount]"
+                                                            class="form-control" step="0.01" required=""></td>
+                                                   <td>
                                                         <select name="line_items[0][currency]" class="form-control"
                                                             required="">
                                                             @foreach ($currencies as $currency)
@@ -201,28 +225,6 @@
                                                                 </option>
                                                             @endforeach
                                                         </select>
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="text" name="line_items[0][reference]"
-                                                            class="form-control"></td>
-                                                    <td><input type="text" name="line_items[0][description]"
-                                                            class="form-control"></td>
-                                                    <td>
-                                                        <select name="line_items[0][dc_indicator]" class="form-control"
-                                                            required="">
-                                                            <option value="D">Debit</option>
-                                                            <option value="C">Credit</option>
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="number" name="line_items[0][amount]"
-                                                            class="form-control" step="0.01" required=""></td>
-                                                    <td>
-                                                        <select name="line_items[0][third_party_id]"
-                                                            class="form-control select2">
-                                                            @foreach ($thirdParties as $thirdParty)
-                                                                <option value="{{ $thirdParty->id }}">
-                                                                    {{ $thirdParty->name }}</option>
-                                                            @endforeach
                                                         </select>
                                                     </td>
                                                     <td><button type="button" class="btn btn-danger remove-row">-</button>

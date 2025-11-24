@@ -47,8 +47,8 @@ class ReportController extends Controller
                      - SUM(CASE WHEN jli.dc_indicator = "C" THEN jli.amount ELSE 0 END) as balance')
             )
             ->groupBy('jli.third_party_id', 'jli.account_code', 'tp.name')
-            ->havingRaw('(SUM(CASE WHEN jli.dc_indicator = "D" THEN jli.amount ELSE 0 END)
-                     - SUM(CASE WHEN jli.dc_indicator = "C" THEN jli.amount ELSE 0 END)) > 0')
+             ->havingRaw('ROUND(SUM(CASE WHEN jli.dc_indicator = "D" THEN jli.amount ELSE 0 END)
+                      - SUM(CASE WHEN jli.dc_indicator = "C" THEN jli.amount ELSE 0 END), 3) <> 0')
             ->orderByDesc(DB::raw('MAX(j.trans_date)'))
             ->get();
 
@@ -67,6 +67,24 @@ class ReportController extends Controller
             ->get();
 
         $previousTotals = $previousTotalsRaw->keyBy('third_party_id');
+
+        $balances = $balances
+    ->map(function ($row) use ($previousTotals) {
+        $prev = $previousTotals->get($row->third_party_id);
+
+        $opening = ($prev->prev_debit ?? 0) - ($prev->prev_credit ?? 0);
+        $current = $row->balance; // from your first query
+        $final   = $opening + $current;
+
+        $row->opening_balance = $opening;
+        $row->final_balance   = $final;
+
+        return $row;
+    })
+    ->filter(function ($row) {
+        return round($row->final_balance, 3) != 0;
+    })
+    ->values(); // reset keys
 
         return view('reports.client_statement', compact('balances', 'previousTotals', 'start_date', 'end_date'));
     }

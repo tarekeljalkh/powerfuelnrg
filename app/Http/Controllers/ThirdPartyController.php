@@ -114,4 +114,24 @@ class ThirdPartyController extends Controller
             return response(['status' => 'error', 'message' => 'Something went wrong!']);
         }
     }
+
+    public function autocomplete(Request $request)
+    {
+        $term = $request->get('term'); // what user typed
+
+        $results = ThirdParty::query()
+            ->when($term, function ($q) use ($term) {
+                $q->where('name', 'like', '%' . $term . '%'); // adjust column name if needed
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get([
+                'id',
+                'name as text', // Select2 expects "id" and "text"
+            ]);
+
+        return response()->json([
+            'results' => $results,
+        ]);
+    }
 }

@@ -163,12 +163,12 @@
                                             <thead>
                                                 <tr>
                                                     <th>Account</th>
-                                                    <th>Currency</th>
-                                                    <th>Reference</th>
-                                                    <th>Description</th>
-                                                    <th>Debit/Credit</th>
-                                                    <th>Amount</th>
                                                     <th>Third Party</th>
+                                                    <th>VAT</th>
+                                                    <th>Description</th>
+                                                    <th>Debit</th>
+                                                    <th>Amount</th>
+                                                    <th>Currency</th>
                                                     <th><button type="button" class="btn btn-success add-row">+</button>
                                                     </th>
                                                 </tr>
@@ -188,16 +188,15 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select name="line_items[0][currency]" class="form-control"
-                                                            required="">
-                                                            @foreach ($currencies as $currency)
-                                                                <option value="{{ $currency->currency_code }}"
-                                                                    {{ $currency->currency_code == 'USD' ? 'selected' : '' }}>
-                                                                    {{ $currency->currency_code }}
-                                                                </option>
+                                                        <select name="line_items[0][third_party_id]"
+                                                            class="form-control select2">
+                                                            @foreach ($thirdParties as $thirdParty)
+                                                                <option value="{{ $thirdParty->id }}">
+                                                                    {{ $thirdParty->name }}</option>
                                                             @endforeach
                                                         </select>
                                                     </td>
+                                                   
                                                     <td><input type="text" name="line_items[0][reference]"
                                                             class="form-control"></td>
                                                     <td><input type="text" name="line_items[0][description]"
@@ -205,18 +204,19 @@
                                                     <td>
                                                         <select name="line_items[0][dc_indicator]" class="form-control"
                                                             required="">
-                                                            <option value="D">Debit</option>
-                                                            <option value="C">Credit</option>
+                                                            <option value="D">Debit</option> 
                                                         </select>
                                                     </td>
                                                     <td><input type="number" name="line_items[0][amount]"
                                                             class="form-control" step="0.01" required=""></td>
-                                                    <td>
-                                                        <select name="line_items[0][third_party_id]"
-                                                            class="form-control select2">
-                                                            @foreach ($thirdParties as $thirdParty)
-                                                                <option value="{{ $thirdParty->id }}">
-                                                                    {{ $thirdParty->name }}</option>
+                                                     <td>
+                                                        <select name="line_items[0][currency]" class="form-control"
+                                                            required="">
+                                                            @foreach ($currencies as $currency)
+                                                                <option value="{{ $currency->currency_code }}"
+                                                                    {{ $currency->currency_code == 'USD' ? 'selected' : '' }}>
+                                                                    {{ $currency->currency_code }}
+                                                                </option>
                                                             @endforeach
                                                         </select>
                                                     </td>

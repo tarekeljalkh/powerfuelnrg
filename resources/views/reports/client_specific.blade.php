@@ -59,6 +59,8 @@
                                 <th>Debit (Current)</th>
                                 <th>Credit (Current)</th>
                                 <th>Balance</th>
+                                <th>Description</th>
+                                <th>Reference</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -82,6 +84,8 @@
                                     <td>{{ number_format($transaction->dc_indicator === 'D' ? $transaction->amount : 0, 3) }}</td>
                                     <td>{{ number_format($transaction->dc_indicator === 'C' ? $transaction->amount : 0, 3) }}</td>
                                     <td>{{ number_format($runningBalance += $transaction->dc_indicator === 'D' ? $transaction->amount : -$transaction->amount, 3) }}</td>
+                                     <td> {{$transaction->description}} </td>
+                                     <td>{{ $transaction->reference}}  </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -93,6 +97,7 @@
                                 <th>{{ number_format($currentTotals->current_debit, 3) }}</th>
                                 <th>{{ number_format($currentTotals->current_credit, 3) }}</th>
                                 <th>{{ number_format($currentTotals->balance, 3) }}</th>
+                                  
                             </tr>
 
                             <tr>
@@ -102,6 +107,7 @@
                                 <th>{{ number_format($currentTotals->current_debit, 3) }}</th>
                                 <th>{{ number_format($currentTotals->current_credit, 3) }}</th>
                                 <th>{{ number_format(($previousTotals->prev_debit  - $previousTotals->prev_credit + $currentTotals->balance), 3) }}</th>
+                                 
                             </tr>
                         </tfoot>
                     </table>

@@ -11,6 +11,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\RoleUserController;
 use App\Http\Controllers\ThirdPartyController;
 use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\StatementController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -74,6 +75,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/client/{id}/balance', [VoucherController::class, 'clientSpecificReport'])->name('reports.client_specific');
 
     Route::get('/invoices/client/{id}', [InvoiceController::class, 'showInvoice'])->name('invoices.show');
+
+    Route::get('/third-parties/autocomplete', [ThirdPartyController::class, 'autocomplete'])
+    ->name('thirdparties.autocomplete');
+
+    Route::get('/reports/statement/filter', [StatementController::class, 'filter'])
+    ->name('reports.statement.filter');
+    
+    Route::get('/reports/statement/{client_id}', [StatementController::class, 'index'])
+    ->name('reports.statement');
+
+    Route::get('/reports/statement/{client_id}/pdf', [StatementController::class, 'pdf'])
+    ->name('reports.statement.pdf');
 
 });
 
